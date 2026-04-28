@@ -1,0 +1,134 @@
+---
+format:
+  html:
+    theme: flatly
+    toc: true
+    toc-depth: 3
+    code-fold: true
+    self-contained: true
+    embed-resources: true
+    execute:
+      warning: false
+      message: false
+editor:
+  markdown:
+    wrap: 72
+---
+
+```{r Encabezado}
+#| echo: false
+#| results: asis
+
+library(knitr)
+
+# --- HTML ---
+if (knitr::is_html_output()) {
+
+titulo <- "Taller 3 — Taller de Programación R"
+autor  <- "Mauricio J. Aragón R. — 201729052<br>Alejandra González - 202111607<br>Valentina González - 202111608"
+fecha <- "Mayo 2026"
+img_path <- "logo.png"
+
+html <- cat("
+<hr>
+
+<div style='text-align: center; font-size: 28px; font-weight: bold;'>
+", titulo, "
+</div>
+
+<div style='display: flex; justify-content: space-between; align-items: center; width: 100%;'>
+
+
+<div style='text-align: left; font-size: 16px; width: 33%;'>
+", autor, "
+</div>
+
+<div style='text-align: center; font-size: 16px; width: 33%;'>
+", fecha, "
+</div>
+
+<div style='text-align: right;'>
+  <img src='", img_path, "' width='180' style='margin-bottom: 10px;'/>
+</div>
+</div>
+<hr>
+")
+
+knitr::asis_output(html)
+}
+```
+
+# Ejercicio 1: Datos Geoespaciales (1.5 puntos)
+
+Elaborarán un mapa en el cual se visualizará el Índice de Desempeño Fiscal (IDF) del DNP por departamento. Para esto, utilizarán tres fuentes de datos:
+
+- `IDF.xlsx` generado por el [DNP](https://ciffit.dnp.gov.co/CIFFIT/ConsultasIDF)
+- Shapefile a nivel departamental y municipal generado por el [DANE](https://geoportal.dane.gov.co/servicios/descarga-y-metadatos/datos-geoestadisticos/?cod=111)
+- `proyección poblacional.xlsx` cuya fuente es el [DANE](https://www.dane.gov.co/files/censo2018/proyecciones-de-poblacion/Municipal/PPED-AreaMun-2018-2042_VP.xlsx)
+- Valor agregado municipal, cuya fuente es el [DANE](https://www.dane.gov.co/index.php/estadisticas-por-tema/cuentas-nacionales/cuentas-nacionales-departamentales)
+
+Sean cuidadosos con las llaves que usan para unir las bases de datos. Recuerden manipular adecuadamente las tres bases de datos y estudiar la estructura que tiene cada una. **No deben modificar o sobreescribir información directamente sobre los archivos**. Todo el tratamiento de datos debe hacerse dentro de R.
+
+```{r Cargar librerías, include=FALSE}
+# include=FALSE: este bloque se ejecuta pero NO aparece en el documento
+knitr::opts_chunk$set(
+  echo    = TRUE,      # mostrar código por defecto en todos los chunks
+  warning = FALSE,     # no imprimir warnings
+  message = FALSE      # no imprimir mensajes (ej. al cargar librerías)
+)
+# Limpiamos el espacio de trabajo
+rm(list = ls())
+
+# Instalación y carga de paquetes necesarios
+required_packages <- c("openxlsx", "ggplot2", "dplyr", "lubridate", "readr",
+                       "writexl", "tidyr", "ggrepel", "geodata", "scales",
+                      "terra", "sf", "patchwork")
+
+# Función para instalar paquetes si no están instalados
+install_if_missing <- function(packages) {
+  new_packages <- packages[!(packages %in% installed.packages()[,"Package"])]
+  if(length(new_packages)) install.packages(new_packages)
+}
+
+install_if_missing(required_packages)
+
+# Cargar librerías
+lapply(required_packages, library, character.only = TRUE)
+
+
+```
+
+```{r Cargar datos}
+
+
+
+```
+
+## Literal A. (1.0)
+
+Para este primer ejercicio, crearán un índice artificial para agregar los datos por departamento, cuya ponderación se realizará por valor agregado per cápita. Es decir, usará la siguiente fórmula:
+
+$$
+\text{IDF}_j = \sum_{i=1}^n \text{IDF}_i \times \frac{L_i \times \text{VA}_i}{\Sigma_j}
+$$
+
+donde:
+
+- $\text{IDF}_j$: Es el Índice de Desempeño Fiscal artificial del departamento $j$
+- $\text{IDF}_i$: Es el Índice de Desempeño Fiscal real del municipio $i$ dentro del departamento $j$
+- $L_i$: Población del municipio $i$
+- $\text{VA}_i$: Es el valor agregado del municipio $i$
+- $\Sigma_j$: Se define como $\Sigma_j = \sum_i^n \text{VA}_i \times L_i$
+- $n$ Número de municipios en el departamento $j$
+
+Por otro lado, nuestro objetivo será aplicar la fórmula para el 2024. Para esto **apliquen el crecimiento del PIB de Colombia en el 2024** (no el $\text{VA}_i$) al crecimiento del $\text{VA}_i$ por municipio, cuyo último dato está en el 2023. Calculen ese crecimiento solo con dos decimales (ejemplo 2.85%) para el cálculo del nuevo $\text{VA}_i$.
+
+Una vez obtenido el índice por departamento, crearán un gráfico utilizando todos los elementos estéticos que permitan una correcta visualización y realizarán una interpretación del mismo. Este debe incluir elementos como un título descriptivo, una leyenda clara, una escala de colores apropiada y cualquier otro elemento que se considere relevante para facilitar la interpretación de los resultados.
+
+
+
+## Literal B (0.5)
+
+Intenten realizar un gráfico del IDF por municipio, pero no es necesario presentarlo en el documento. ¿Qué problemas encuentran al intentar realizarlo? expliquen por qué pasa esto.
+
+# Ejercicio 2: Web Scraping y Uso de API (2.0)
