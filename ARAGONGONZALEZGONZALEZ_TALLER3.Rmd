@@ -58,6 +58,8 @@ knitr::asis_output(html)
 }
 ```
 
+**Nota sobre uso de IA:** Se anexa un documento adicional con las conversaciones sostenidas con agentes de IA en caso de que se hayan utilizado para desarrollar el taller.
+
 # Ejercicio 1: Datos Geoespaciales (1.5 puntos)
 
 Elaborarán un mapa en el cual se visualizará el Índice de Desempeño Fiscal (IDF) del DNP por departamento. Para esto, utilizarán tres fuentes de datos:
@@ -82,7 +84,7 @@ rm(list = ls())
 # Instalación y carga de paquetes necesarios
 required_packages <- c("openxlsx", "ggplot2", "dplyr", "lubridate", "readr",
                        "writexl", "tidyr", "ggrepel", "geodata", "scales",
-                      "terra", "sf", "patchwork")
+                      "terra", "sf", "patchwork","readxl")
 
 # Función para instalar paquetes si no están instalados
 install_if_missing <- function(packages) {
@@ -100,9 +102,38 @@ lapply(required_packages, library, character.only = TRUE)
 
 ```{r Cargar datos}
 
+#Primero cargamos la del IDF
+#Usar el nombre con el que tengan disponible la consulta del DNP
+df_idf <- read_excel(
+  "ConsultaIDF_2024.xlsx",
+  skip = 16
+) %>% rename(MPIO = `Código Entidad`)
 
+#Segundo cargamos la de población para 2024 y solo los totales
+df_pop <- read_excel(
+  "PPED-AreaMun-2018-2042_VP.xlsx",
+  sheet = "PobMunicipalxÁrea",
+  skip = 7
+) %>% filter(AÑO==2024) %>% filter(`ÁREA GEOGRÁFICA` == "Total")
 
+#Tercero cargamos el valor agregado municipal (pesos corrientes)
+df_va <- read_excel(
+  "anex-PIBDep-ValorAgreMuni-2011-2023p.xlsx",
+  sheet = "Cuadro 14",
+  skip = 10
+) %>% filter(!is.na(Municipio)) %>% rename(MPIO = `Código Municipio`)
+
+#Cuarto hacemos el junte de las bases de datos
+
+df <- df_idf %>% left_join(df_pop, by = "MPIO") %>% rename(Poblacion = TOTAL) %>% 
+  left_join(df_va, by = "MPIO")
+
+base_mun <- df %>% select(DP, DPNOM, MPIO, DPMP, IDF,
+                      Poblacion, `Valor agregado\r\n`, Rango) %>%
+  rename(VA = `Valor agregado\r\n`) 
 ```
+
+**Uso IA:** Revisar el documento anexo en donde se detalla la conversación para usar `read_excel`.
 
 ## Literal A. (1.0)
 
@@ -123,12 +154,76 @@ donde:
 
 Por otro lado, nuestro objetivo será aplicar la fórmula para el 2024. Para esto **apliquen el crecimiento del PIB de Colombia en el 2024** (no el $\text{VA}_i$) al crecimiento del $\text{VA}_i$ por municipio, cuyo último dato está en el 2023. Calculen ese crecimiento solo con dos decimales (ejemplo 2.85%) para el cálculo del nuevo $\text{VA}_i$.
 
+```{r Cálculo del índice}
+# Ajustamos el VA a 2024
+
+
+# Comenzamos por adicionar la variable L x VA
+base_mun_ind <- base_mun %>% mutate(PobxVA = Poblacion * VA)
+
+# La agregamos a nivel departamental
+base_d <- base_mun_ind %>% group_by(DP) %>% summarise(
+  sum(PobxVA, na.rm = TRUE))
+
+# La añadimos a la base municipal
+base_mun_ind <- base_mun_ind %>% left_join(base_d, by="DP") %>%
+  rename(PobxVA_Dep = `sum(PobxVA, na.rm = TRUE)`) %>% 
+  # Creamos la variable departamental que se debe agregar
+  mutate(ind_dep = IDF * PobxVA / PobxVA_Dep)
+
+# Armamos la base departamental
+base_dep <- base_mun_ind %>% group_by(DP, DPNOM) %>% summarise(IDF_dep =
+  sum(ind_dep, na.rm = TRUE), .groups = "drop")
+
+# Añadimos el factor de rango para los mapas
+base_dep <- base_dep %>%
+  mutate(Rango = case_when(
+      IDF_dep < 40 ~ 1,
+      IDF_dep >= 40 & IDF_dep < 60 ~ 2,
+      IDF_dep >= 60 & IDF_dep < 70 ~ 3,
+      IDF_dep >= 70 & IDF_dep < 80 ~ 4,
+      IDF_dep >= 80 ~ 5
+    )
+  ) %>% mutate(Rango_Cat = factor(
+    Rango,
+    levels = c(1,2,3,4,5),
+    labels = c("Deterioro", "Riesgo", "Vulnerable", "Solvente", "Sostenible")
+  ))
+
+```
+
+**Nota:** Con base en la información disponible en el DANE, calculamos un incremento del PIB corriente de X.XX% entre 2023 y 2024
+
 Una vez obtenido el índice por departamento, crearán un gráfico utilizando todos los elementos estéticos que permitan una correcta visualización y realizarán una interpretación del mismo. Este debe incluir elementos como un título descriptivo, una leyenda clara, una escala de colores apropiada y cualquier otro elemento que se considere relevante para facilitar la interpretación de los resultados.
 
+```{r Mapa Departamental}
+# Cargamos los datos geoespaciales
+shapefile_path <- "MGN2025_DPTO_POLITICO"
+crs <- "+proj=longlat +datum=WGS84"  # Proyección WGS84
+sf_data <- st_read(dsn = shapefile_path) %>% rename(DP = dpto_ccdgo) %>% 
+  left_join(base_dep, by = "DP")
+
+# Mapa
+IDF_DPTOS <- ggplot() + 
+  geom_sf(data = sf_data, aes(fill = IDF_dep))
+
+IDF_DPTOS_cat <- ggplot() + 
+  geom_sf(data = sf_data, aes(fill = Rango_Cat))
+
+Grafico1 <- IDF_DPTOS | IDF_DPTOS_cat
+
+print(Grafico1)
+```
 
 
 ## Literal B (0.5)
 
 Intenten realizar un gráfico del IDF por municipio, pero no es necesario presentarlo en el documento. ¿Qué problemas encuentran al intentar realizarlo? expliquen por qué pasa esto.
+
+```{r Mapa Municipal}
+#
+```
+
+**R/:** Para la elaboración del mapa nos topamos con un problema computacional...
 
 # Ejercicio 2: Web Scraping y Uso de API (2.0)
