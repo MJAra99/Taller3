@@ -288,6 +288,44 @@ Grafico2 <- IDF_MPIOS | IDF_MPIOS_cat
 print(Grafico2)
 ```
 
+```{r Mapa Departamental2}
+# Mapa
+# 1. Creamos el objeto ggplot
+p <- ggplot(data = sf_dataM) +
+  geom_sf(aes(fill = IDF, 
+              # El argumento 'text' define lo que aparecerá en el hover
+              text = paste("Municipio:", mpio_cnmbr, # Asumiendo nombre del depto
+                           "<br>IDF:", IDF,
+                           "<br>Rango:", Rango_Cat)),
+          color = "lightgray", 
+          size = 0.1) + # Líneas geográficas delgadas y gris claro
+  
+  # Escala de colores: Rojo (bajo) a Verde (alto)
+  scale_fill_gradient(low = "red", high = "green", name = "IDF") +
+  
+  # Título y Notas
+  labs(title = "Índice de Desempeño Fiscal por Departamento - 2024",
+       caption = "Fuente: DNP") +
+  
+  # Configuración estética del fondo y ejes
+  theme_void() + # Elimina ejes, fondos, grids y leyendas de ejes de golpe
+  theme(
+    panel.background = element_rect(fill = "white", color = NA),
+    plot.title = element_text(hjust = 0.5, face = "bold"),
+    legend.position = "right"
+  )
+
+# 2. Convertimos a interactivo con plotly
+# 'tooltip' indica que use la estética 'text' definida arriba
+mapa_interactivo <- ggplotly(p, tooltip = "text") %>%
+  layout(title = list(text = paste0('Índice de Desempeño Fiscal por Departamento - 2024',
+                                    '<br>',
+                                    '<sup>Fuente: DNP</sup>')))
+
+# Visualizar
+mapa_interactivo
+```
+
 **R/:** Para la elaboración del mapa nos topamos con un problema computacional...
 
 # Ejercicio 2: Web Scraping y Uso de API (2.0)
