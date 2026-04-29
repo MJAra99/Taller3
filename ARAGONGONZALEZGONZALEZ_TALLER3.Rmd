@@ -196,13 +196,34 @@ base_dep <- base_dep %>%
 
 Una vez obtenido el índice por departamento, crearán un gráfico utilizando todos los elementos estéticos que permitan una correcta visualización y realizarán una interpretación del mismo. Este debe incluir elementos como un título descriptivo, una leyenda clara, una escala de colores apropiada y cualquier otro elemento que se considere relevante para facilitar la interpretación de los resultados.
 
-```{r Mapa Departamental}
+```{r Mapa Datos geoespaciales, include =FALSE}
 # Cargamos los datos geoespaciales
 shapefile_path <- "MGN2025_DPTO_POLITICO"
 crs <- "+proj=longlat +datum=WGS84"  # Proyección WGS84
 sf_data <- st_read(dsn = shapefile_path) %>% rename(DP = dpto_ccdgo) %>% 
   left_join(base_dep, by = "DP")
 
+# Cargamos los datos geoespaciales municipales
+base_mun <- base_mun%>%
+  mutate(Rango = case_when(
+      IDF < 40 ~ 1,
+      IDF >= 40 & IDF < 60 ~ 2,
+      IDF >= 60 & IDF < 70 ~ 3,
+      IDF >= 70 & IDF < 80 ~ 4,
+      IDF >= 80 ~ 5
+    )
+  ) %>% mutate(Rango_Cat = factor(
+    Rango,
+    levels = c(1,2,3,4,5),
+    labels = c("Deterioro", "Riesgo", "Vulnerable", "Solvente", "Sostenible")
+  ))
+
+shapefile_pathM <- "MGN2025_MPIO_GRAFICO"
+sf_dataM <- st_read(dsn = shapefile_pathM) %>% rename(MPIO = mpio_cdpmp) %>% 
+  left_join(base_mun, by = "MPIO")
+```
+
+```{r Mapa Departamental}
 # Mapa
 IDF_DPTOS <- ggplot() + 
   geom_sf(data = sf_data, aes(fill = IDF_dep))
@@ -221,7 +242,15 @@ print(Grafico1)
 Intenten realizar un gráfico del IDF por municipio, pero no es necesario presentarlo en el documento. ¿Qué problemas encuentran al intentar realizarlo? expliquen por qué pasa esto.
 
 ```{r Mapa Municipal}
-#
+#Generamos una modificación de Rango para el mapa municipal
+IDF_MPIOS <- ggplot() + 
+  geom_sf(data = sf_dataM, aes(fill = IDF))
+
+IDF_MPIOS_cat <- ggplot() + 
+  geom_sf(data = sf_dataM, aes(fill = Rango_Cat))
+
+Grafico2 <- IDF_MPIOS | IDF_MPIOS_cat
+print(Grafico2)
 ```
 
 **R/:** Para la elaboración del mapa nos topamos con un problema computacional...
