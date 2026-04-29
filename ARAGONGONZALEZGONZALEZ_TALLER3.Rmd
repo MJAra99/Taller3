@@ -82,9 +82,9 @@ knitr::opts_chunk$set(
 rm(list = ls())
 
 # Instalación y carga de paquetes necesarios
-required_packages <- c("openxlsx", "ggplot2", "dplyr", "lubridate", "readr",
-                       "writexl", "tidyr", "ggrepel", "geodata", "scales",
-                      "terra", "sf", "patchwork","readxl")
+required_packages <- c("ggplot2", "dplyr", "lubridate", "readr",
+                       "writexl", "tidyr", "ggrepel",
+                      "sf", "patchwork","readxl","scales", "plotly")
 
 # Función para instalar paquetes si no están instalados
 install_if_missing <- function(packages) {
@@ -132,8 +132,6 @@ base_mun <- df %>% select(DP, DPNOM, MPIO, DPMP, IDF,
                       Poblacion, `Valor agregado\r\n`, Rango) %>%
   rename(VA = `Valor agregado\r\n`) 
 ```
-
-**Uso IA:** Revisar el documento anexo en donde se detalla la conversación para usar `read_excel`.
 
 ## Literal A. (1.0)
 
@@ -236,6 +234,43 @@ Grafico1 <- IDF_DPTOS | IDF_DPTOS_cat
 print(Grafico1)
 ```
 
+```{r Mapa Departamental2}
+# Mapa
+# 1. Creamos el objeto ggplot
+p <- ggplot(data = sf_data) +
+  geom_sf(aes(fill = IDF_dep, 
+              # El argumento 'text' define lo que aparecerá en el hover
+              text = paste("Departamento:", DPNOM, # Asumiendo nombre del depto
+                           "<br>IDF:", IDF_dep,
+                           "<br>Rango:", Rango_Cat)),
+          color = "lightgray", 
+          size = 0.1) + # Líneas geográficas delgadas y gris claro
+  
+  # Escala de colores: Rojo (bajo) a Verde (alto)
+  scale_fill_gradient(low = "red", high = "green", name = "IDF") +
+  
+  # Título y Notas
+  labs(title = "Índice de Desempeño Fiscal por Departamento - 2024",
+       caption = "Fuente: DNP") +
+  
+  # Configuración estética del fondo y ejes
+  theme_void() + # Elimina ejes, fondos, grids y leyendas de ejes de golpe
+  theme(
+    panel.background = element_rect(fill = "white", color = NA),
+    plot.title = element_text(hjust = 0.5, face = "bold"),
+    legend.position = "right"
+  )
+
+# 2. Convertimos a interactivo con plotly
+# 'tooltip' indica que use la estética 'text' definida arriba
+mapa_interactivo <- ggplotly(p, tooltip = "text") %>%
+  layout(title = list(text = paste0('Índice de Desempeño Fiscal por Departamento - 2024',
+                                    '<br>',
+                                    '<sup>Fuente: DNP</sup>')))
+
+# Visualizar
+mapa_interactivo
+```
 
 ## Literal B (0.5)
 
