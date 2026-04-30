@@ -234,7 +234,7 @@ Grafico1 <- IDF_DPTOS | IDF_DPTOS_cat
 print(Grafico1)
 ```
 
-```{r Mapa Departamental2}
+```{r Mapa Departamental 2}
 # Mapa
 # 1. Creamos el objeto ggplot
 p <- ggplot(data = sf_data) +
