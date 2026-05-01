@@ -1,61 +1,22 @@
 ---
-format:
-  html:
+title: "Taller 3 - Taller Programación R"
+date: "Mayo 2026"
+author: "Mauricio J. Aragón R. — 201729052<br>Alejandra González - 202111607<br>Valentina González - 202111608"
+
+output:
+  html_document:
     theme: flatly
     toc: true
-    toc-depth: 3
-    code-fold: true
-    self-contained: true
-    embed-resources: true
-    execute:
-      warning: false
-      message: false
-editor:
-  markdown:
-    wrap: 72
+    toc_depth: 3
+    toc_float: true
+    code_folding: hide
 ---
 
-```{r Encabezado}
-#| echo: false
-#| results: asis
-
-library(knitr)
-
-# --- HTML ---
-if (knitr::is_html_output()) {
-
-titulo <- "Taller 3 — Taller de Programación R"
-autor  <- "Mauricio J. Aragón R. — 201729052<br>Alejandra González - 202111607<br>Valentina González - 202111608"
-fecha <- "Mayo 2026"
-img_path <- "logo.png"
-
-html <- cat("
-<hr>
-
-<div style='text-align: center; font-size: 28px; font-weight: bold;'>
-", titulo, "
-</div>
-
-<div style='display: flex; justify-content: space-between; align-items: center; width: 100%;'>
-
-
-<div style='text-align: left; font-size: 16px; width: 33%;'>
-", autor, "
-</div>
-
-<div style='text-align: center; font-size: 16px; width: 33%;'>
-", fecha, "
-</div>
-
-<div style='text-align: right;'>
-  <img src='", img_path, "' width='180' style='margin-bottom: 10px;'/>
-</div>
-</div>
-<hr>
-")
-
-knitr::asis_output(html)
-}
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  warning = FALSE,
+  message = FALSE
+)
 ```
 
 **Nota sobre uso de IA:** Se anexa un documento adicional con las conversaciones sostenidas con agentes de IA en caso de que se hayan utilizado para desarrollar el taller.
@@ -84,7 +45,7 @@ rm(list = ls())
 # Instalación y carga de paquetes necesarios
 required_packages <- c("ggplot2", "dplyr", "lubridate", "readr",
                        "writexl", "tidyr", "ggrepel",
-                      "sf", "patchwork","readxl","scales", "plotly")
+                      "sf", "patchwork","readxl","scales", "plotly","rmapshaper","leaflet","htmltools","sf","magrittr","modelsummary")
 
 # Función para instalar paquetes si no están instalados
 install_if_missing <- function(packages) {
@@ -154,10 +115,10 @@ Por otro lado, nuestro objetivo será aplicar la fórmula para el 2024. Para est
 
 ```{r Cálculo del índice}
 # Ajustamos el VA a 2024
-
+base_mun_ind <- base_mun %>% mutate(VA24 = VA * 1.0795)
 
 # Comenzamos por adicionar la variable L x VA
-base_mun_ind <- base_mun %>% mutate(PobxVA = Poblacion * VA)
+base_mun_ind <- base_mun_ind %>% mutate(PobxVA = Poblacion * VA24)
 
 # La agregamos a nivel departamental
 base_d <- base_mun_ind %>% group_by(DP) %>% summarise(
@@ -190,16 +151,17 @@ base_dep <- base_dep %>%
 
 ```
 
-**Nota:** Con base en la información disponible en el DANE, calculamos un incremento del PIB corriente de X.XX% entre 2023 y 2024
+**Nota:** Con base en la información disponible en el DANE, calculamos un incremento del PIB corriente de 7.95% entre 2023 y 2024
 
 Una vez obtenido el índice por departamento, crearán un gráfico utilizando todos los elementos estéticos que permitan una correcta visualización y realizarán una interpretación del mismo. Este debe incluir elementos como un título descriptivo, una leyenda clara, una escala de colores apropiada y cualquier otro elemento que se considere relevante para facilitar la interpretación de los resultados.
 
-```{r Mapa Datos geoespaciales, include =FALSE}
+```{r Datos geoespaciales, include =FALSE}
 # Cargamos los datos geoespaciales
 shapefile_path <- "MGN2025_DPTO_POLITICO"
 crs <- "+proj=longlat +datum=WGS84"  # Proyección WGS84
 sf_data <- st_read(dsn = shapefile_path) %>% rename(DP = dpto_ccdgo) %>% 
-  left_join(base_dep, by = "DP")
+  left_join(base_dep, by = "DP") %>%
+  ms_simplify(keep=0.05, keep_shapes = TRUE)
 
 # Cargamos los datos geoespaciales municipales
 base_mun <- base_mun%>%
@@ -218,112 +180,295 @@ base_mun <- base_mun%>%
 
 shapefile_pathM <- "MGN2025_MPIO_GRAFICO"
 sf_dataM <- st_read(dsn = shapefile_pathM) %>% rename(MPIO = mpio_cdpmp) %>% 
-  left_join(base_mun, by = "MPIO")
+  left_join(base_mun, by = "MPIO")%>%
+  st_make_valid() %>% st_cast("MULTIPOLYGON") %>%
+  ms_simplify(keep=0.05, keep_shapes = TRUE)
 ```
 
-```{r Mapa Departamental}
+```{r Mapa Departamental, warning=FALSE, echo=FALSE}
 # Mapa
-IDF_DPTOS <- ggplot() + 
-  geom_sf(data = sf_data, aes(fill = IDF_dep))
+# 1. Configuración de la paleta continua (Rojo a Verde)
+# 'domain' debe ser el rango de tu variable IDF_dep
+pal_dep <- colorNumeric(
+  palette = c("red", "#339933"), 
+  domain = sf_data$IDF_dep
+)
 
-IDF_DPTOS_cat <- ggplot() + 
-  geom_sf(data = sf_data, aes(fill = Rango_Cat))
+# 2. Definición del texto para el Hover (Labels)
+labels_dep <- sprintf(
+  "<strong>Departamento:</strong> %s<br/><strong>IDF:</strong> %g<br/><strong>Rango:</strong> %s",
+  sf_data$DPNOM, sf_data$IDF_dep, sf_data$Rango_Cat
+) %>% lapply(htmltools::HTML)
 
-Grafico1 <- IDF_DPTOS | IDF_DPTOS_cat
-
-print(Grafico1)
-```
-
-```{r Mapa Departamental 2}
-# Mapa
-# 1. Creamos el objeto ggplot
-p <- ggplot(data = sf_data) +
-  geom_sf(aes(fill = IDF_dep, 
-              # El argumento 'text' define lo que aparecerá en el hover
-              text = paste("Departamento:", DPNOM, # Asumiendo nombre del depto
-                           "<br>IDF:", IDF_dep,
-                           "<br>Rango:", Rango_Cat)),
-          color = "lightgray", 
-          size = 0.1) + # Líneas geográficas delgadas y gris claro
+# 3. Creación del Mapa
+mapa_dep_leaflet <- leaflet(sf_data) %>%
+  # Usamos un proveedor de mapas minimalista y claro
+  addProviderTiles(providers$CartoDB.Positron) %>% 
   
-  # Escala de colores: Rojo (bajo) a Verde (alto)
-  scale_fill_gradient(low = "red", high = "green", name = "IDF") +
+  addPolygons(
+    fillColor = ~pal_dep(IDF_dep),
+    weight = 1,
+    opacity = 1,
+    color = "lightgray", # Color de las líneas de división
+    dashArray = "1",
+    fillOpacity = 0.7,
+    # Efecto al pasar el mouse
+    highlightOptions = highlightOptions(
+      weight = 3,
+      color = "#666",
+      fillOpacity = 0.9,
+      bringToFront = TRUE
+    ),
+    label = labels_dep,
+    labelOptions = labelOptions(
+      style = list("font-weight" = "normal", padding = "3px 8px"),
+      textsize = "13px",
+      direction = "auto"
+    )
+  ) %>%
   
-  # Título y Notas
-  labs(title = "Índice de Desempeño Fiscal por Departamento - 2024",
-       caption = "Fuente: DNP") +
+  # Leyenda continua
+  addLegend(
+    pal = pal_dep, 
+    values = ~IDF_dep, 
+    opacity = 0.7, 
+    title = "IDF",
+    position = "bottomright"
+  ) %>%
   
-  # Configuración estética del fondo y ejes
-  theme_void() + # Elimina ejes, fondos, grids y leyendas de ejes de golpe
-  theme(
-    panel.background = element_rect(fill = "white", color = NA),
-    plot.title = element_text(hjust = 0.5, face = "bold"),
-    legend.position = "right"
+  # Título (arriba a la derecha)
+  addControl(
+    html = "<div style='font-size:15px; font-weight:bold; background: white; padding: 5px; border-radius: 5px;'>
+            Índice de Desempeño Fiscal por Departamento - 2024
+            </div>", 
+    position = "topright"
+  ) %>%
+  
+  # Fuente (abajo a la izquierda)
+  addControl(
+    html = "<div style='font-size:10px; color:gray; background: rgba(255,255,255,0.5); padding: 2px;'>Fuente: DNP</div>", 
+    position = "bottomleft"
   )
 
-# 2. Convertimos a interactivo con plotly
-# 'tooltip' indica que use la estética 'text' definida arriba
-mapa_interactivo <- ggplotly(p, tooltip = "text") %>%
-  layout(title = list(text = paste0('Índice de Desempeño Fiscal por Departamento - 2024',
-                                    '<br>',
-                                    '<sup>Fuente: DNP</sup>')))
+# Visualizar
+mapa_dep_leaflet
+```
+
+```{r Mapa Departamental2, warning=FALSE, echo=FALSE}
+# 1. Definimos la paleta de 5 colores de rojo oscuro a verde oscuro
+colores_rango <- c(
+  "Deterioro"  = "darkred",
+  "Riesgo"     = "firebrick3",
+  "Vulnerable" = "gold",
+  "Solvente"   = "seagreen3",
+  "Sostenible" = "darkgreen"
+)
+
+# 1. Preparación de la paleta de colores
+# Asegúrate de que 'colores_rango' sea un vector con nombre o coincida con los niveles de Rango_Cat
+pal <- colorFactor(palette = colores_rango, domain = sf_data$Rango_Cat)
+
+# 2. Definición del texto del Hover (Labels)
+# Usamos HTML para que los saltos de línea funcionen
+labels <- sprintf(
+  "<strong>Departamento:</strong> %s<br/><strong>Categoría:</strong> %s<br/><strong>Valor IDF:</strong> %g",
+  sf_data$DPNOM, sf_data$Rango_Cat, sf_data$IDF_dep
+) %>% lapply(htmltools::HTML)
+
+# 3. Creación del Mapa Leaflet
+mapa_leaflet_dep <- leaflet(sf_data) %>%
+  addProviderTiles(providers$CartoDB.Positron) %>%  # Fondo de mapa
+  addPolygons(
+    fillColor = ~pal(Rango_Cat),
+    weight = 0.5,
+    opacity = 1,
+    color = "white",
+    dashArray = "3",
+    fillOpacity = 0.7,
+    highlightOptions = highlightOptions(
+      weight = 2,
+      color = "#666",
+      dashArray = "",
+      fillOpacity = 1,
+      bringToFront = TRUE
+    ),
+    label = labels,
+    labelOptions = labelOptions(
+      style = list("font-weight" = "normal", padding = "3px 8px"),
+      textsize = "13px",
+      direction = "auto"
+    )
+  ) %>%
+  addLegend(
+    pal = pal, 
+    values = ~Rango_Cat, 
+    opacity = 0.7, 
+    title = "Desempeño Fiscal",
+    position = "bottomright"
+  ) %>%
+  addControl(
+    html = "<div style='font-size:14px; font-weight:bold;'>Índice de Desempeño Fiscal por Departamento - 2024</div>", 
+    position = "topright"
+  ) %>%
+  addControl(
+    html = "<div style='font-size:10px; color:gray;'>Fuente: DNP</div>", 
+    position = "bottomleft"
+  )
 
 # Visualizar
-mapa_interactivo
+mapa_leaflet_dep
+```
+
+A continuación, se presenta una breve interpretación de los resultados obtenidos. En primer lugar, se presenta una tabla con el IDF de los departamentos detallando cada una de las categorías:
+
+```{r tabla1}
+tabla_cat <- datasummary(
+  Rango_Cat ~ (N + Percent()),
+  data = base_dep
+)
+print(tabla_cat)
+```
+
+```{r tabla2}
+tabla_top5 <- base_dep %>%
+  arrange(desc(IDF_dep)) %>%
+  head(5)
+
+tabla_tail5 <- base_dep %>%
+  arrange(IDF_dep) %>%
+  head(5)
+
+datasummary_df(tabla_top5)
+datasummary_df(tabla_tail5)
+
 ```
 
 ## Literal B (0.5)
 
 Intenten realizar un gráfico del IDF por municipio, pero no es necesario presentarlo en el documento. ¿Qué problemas encuentran al intentar realizarlo? expliquen por qué pasa esto.
 
-```{r Mapa Municipal}
-#Generamos una modificación de Rango para el mapa municipal
-IDF_MPIOS <- ggplot() + 
-  geom_sf(data = sf_dataM, aes(fill = IDF))
-
-IDF_MPIOS_cat <- ggplot() + 
-  geom_sf(data = sf_dataM, aes(fill = Rango_Cat))
-
-Grafico2 <- IDF_MPIOS | IDF_MPIOS_cat
-print(Grafico2)
-```
-
-```{r Mapa Departamental2}
+```{r Mapa Municipal, warning=FALSE, echo=FALSE}
 # Mapa
-# 1. Creamos el objeto ggplot
-p <- ggplot(data = sf_dataM) +
-  geom_sf(aes(fill = IDF, 
-              # El argumento 'text' define lo que aparecerá en el hover
-              text = paste("Municipio:", mpio_cnmbr, # Asumiendo nombre del depto
-                           "<br>IDF:", IDF,
-                           "<br>Rango:", Rango_Cat)),
-          color = "lightgray", 
-          size = 0.1) + # Líneas geográficas delgadas y gris claro
+# 1. Configuración de la paleta continua (Rojo a Verde)
+pal_mun <- colorNumeric(
+  palette = c("red", "#339933"), 
+  domain = sf_dataM$IDF
+)
+
+# 2. Definición del texto para el Hover (Labels)
+labels <- sprintf(
+  "<strong>Municipio:</strong> %s<br/><strong>Categoría:</strong> %s<br/><strong>Valor IDF:</strong> %g",
+  sf_dataM$mpio_cnmbr, sf_dataM$Rango_Cat, sf_dataM$IDF
+) %>% lapply(htmltools::HTML)
+
+# 3. Creación del Mapa
+mapa_mun_leaflet <- leaflet(sf_dataM) %>%
+  # Usamos un proveedor de mapas minimalista y claro
+  addProviderTiles(providers$CartoDB.Positron) %>% 
   
-  # Escala de colores: Rojo (bajo) a Verde (alto)
-  scale_fill_gradient(low = "red", high = "green", name = "IDF") +
+  addPolygons(
+    fillColor = ~pal_mun(IDF),
+    weight = 0.3,
+    opacity = 1,
+    color = "lightgray", # Color de las líneas de división
+    dashArray = "1",
+    fillOpacity = 0.7,
+    # Efecto al pasar el mouse
+    highlightOptions = highlightOptions(
+      weight = 3,
+      color = "#666",
+      fillOpacity = 0.9,
+      bringToFront = TRUE
+    ),
+    label = labels,
+    labelOptions = labelOptions(
+      style = list("font-weight" = "normal", padding = "3px 8px"),
+      textsize = "13px",
+      direction = "auto"
+    )
+  ) %>%
   
-  # Título y Notas
-  labs(title = "Índice de Desempeño Fiscal por Departamento - 2024",
-       caption = "Fuente: DNP") +
+  # Leyenda continua
+  addLegend(
+    pal = pal_mun, 
+    values = ~IDF, 
+    opacity = 0.7, 
+    title = "IDF",
+    position = "bottomright"
+  ) %>%
   
-  # Configuración estética del fondo y ejes
-  theme_void() + # Elimina ejes, fondos, grids y leyendas de ejes de golpe
-  theme(
-    panel.background = element_rect(fill = "white", color = NA),
-    plot.title = element_text(hjust = 0.5, face = "bold"),
-    legend.position = "right"
+  # Título (arriba a la derecha)
+  addControl(
+    html = "<div style='font-size:15px; font-weight:bold; background: white; padding: 5px; border-radius: 5px;'>
+            Índice de Desempeño Fiscal por Municipio - 2024
+            </div>", 
+    position = "topright"
+  ) %>%
+  
+  # Fuente (abajo a la izquierda)
+  addControl(
+    html = "<div style='font-size:10px; color:gray; background: rgba(255,255,255,0.5); padding: 2px;'>Fuente: DNP</div>", 
+    position = "bottomleft"
   )
 
-# 2. Convertimos a interactivo con plotly
-# 'tooltip' indica que use la estética 'text' definida arriba
-mapa_interactivo <- ggplotly(p, tooltip = "text") %>%
-  layout(title = list(text = paste0('Índice de Desempeño Fiscal por Departamento - 2024',
-                                    '<br>',
-                                    '<sup>Fuente: DNP</sup>')))
+# Visualizar
+mapa_mun_leaflet
+```
+
+```{r Mapa Municipal2, warning=FALSE, echo=FALSE}
+# 1. Preparación de la paleta de colores
+# Asegúrate de que 'colores_rango' sea un vector con nombre o coincida con los niveles de Rango_Cat
+pal <- colorFactor(palette = colores_rango, domain = sf_dataM$Rango_Cat)
+
+# 2. Definición del texto del Hover (Labels)
+# Usamos HTML para que los saltos de línea funcionen
+labels <- sprintf(
+  "<strong>Municipio:</strong> %s<br/><strong>Categoría:</strong> %s<br/><strong>Valor IDF:</strong> %g",
+  sf_dataM$mpio_cnmbr, sf_dataM$Rango_Cat, sf_dataM$IDF
+) %>% lapply(htmltools::HTML)
+
+# 3. Creación del Mapa Leaflet
+mapa_leaflet <- leaflet(sf_dataM) %>%
+  addProviderTiles(providers$CartoDB.Positron) %>%  # Fondo de mapa
+  addPolygons(
+    fillColor = ~pal(Rango_Cat),
+    weight = 0.3,
+    opacity = 1,
+    color = "white",
+    dashArray = "3",
+    fillOpacity = 0.7,
+    highlightOptions = highlightOptions(
+      weight = 2,
+      color = "#666",
+      dashArray = "",
+      fillOpacity = 1,
+      bringToFront = TRUE
+    ),
+    label = labels,
+    labelOptions = labelOptions(
+      style = list("font-weight" = "normal", padding = "3px 8px"),
+      textsize = "13px",
+      direction = "auto"
+    )
+  ) %>%
+  addLegend(
+    pal = pal, 
+    values = ~Rango_Cat, 
+    opacity = 0.7, 
+    title = "Desempeño Fiscal",
+    position = "bottomright"
+  ) %>%
+  addControl(
+    html = "<div style='font-size:14px; font-weight:bold;'>Índice de Desempeño Fiscal por Municipio - 2024</div>", 
+    position = "topright"
+  ) %>%
+  addControl(
+    html = "<div style='font-size:10px; color:gray;'>Fuente: DNP</div>", 
+    position = "bottomleft"
+  )
 
 # Visualizar
-mapa_interactivo
+mapa_leaflet
 ```
 
 **R/:** Para la elaboración del mapa nos topamos con un problema computacional...
