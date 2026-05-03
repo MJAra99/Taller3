@@ -662,10 +662,49 @@ literalA <- ggplot(df_ibr, aes(x = Fecha, y = IBR)) +
 print (literalA)
 ```
 
-Se resalta la posibilidad de observar el gráfico de manera animada  (en versiones HTML) con el fin confirmar la 
+*Se resalta la posibilidad de observar el gráfico de manera animada  (en versiones HTML) con el fin confirmar la 
 réplica exacta de la versión original disponible en la página web del Banrep 
 (disponible aquí: https://suameca.banrep.gov.co/graficador-interactivo/grafica/241). 
 
+**Interpretación:** la dinámica observada en la serie del IBR overnight para el periodo 2020–2025 refleja con 
+bastante claridad la transmisión de la política monetaria del Banco de la República frente a choques macroeconómicos 
+sucesivos, particularmente la pandemia y el posterior episodio inflacionario.
+
+En una primera fase (primer semestre de 2020), se identifica una reducción abrupta de la tasa, 
+pasando de niveles cercanos al 4% a valores por debajo del 2%. Este comportamiento es consistente con una política monetaria 
+expansiva contracíclica, orientada a mitigar la caída de la actividad económica derivada del choque exógeno del COVID-19. 
+La disminución del IBR, como tasa interbancaria de referencia, refleja una relajación de las condiciones de 
+liquidez y un abaratamiento del costo del dinero en el corto plazo.
+
+Posteriormente, entre finales de 2020 y buena parte de 2021, la tasa se mantiene en niveles históricamente bajos 
+y relativamente estables. Este tramo sugiere una postura acomodaticia prolongada, en un contexto donde la recuperación 
+económica aún era incipiente y las presiones inflacionarias se mantenían contenidas.
+
+A partir de 2022 se observa un cambio de régimen claramente definido: la tasa inicia un ciclo de incrementos 
+sostenidos y pronunciados, alcanzando niveles superiores al 12% hacia 2023. Este comportamiento responde a un 
+proceso de endurecimiento monetario (tightening), motivado por el aumento de la inflación (tanto por factores internos como externos)
+y la necesidad de anclar expectativas inflacionarias. La pendiente empinada de la curva en este periodo evidencia una respuesta 
+agresiva de política, donde el Banco de la República incrementa rápidamente su tasa de referencia, lo cual se transmite casi uno a uno al IBR.
+
+Es particularmente relevante notar que la trayectoria ascendente no es completamente suave, sino escalonada, 
+lo cual es coherente con la naturaleza discreta de las decisiones de política monetaria (reuniones periódicas de la Junta Directiva). 
+Esto sugiere una alta efectividad en el mecanismo de transmisión hacia el mercado interbancario, donde el IBR 
+actúa como un reflejo inmediato de la tasa de política.
+
+Finalmente, desde mediados de 2023 en adelante, se evidencia una fase de estabilización seguida de 
+una leve reducción de la tasa, ubicándose alrededor del 9% hacia 2025. Este comportamiento es indicativo de
+una transición hacia una postura monetaria menos restrictiva, posiblemente en respuesta a la moderación de la inflación y 
+a la necesidad de no afectar excesivamente la actividad económica. Sin embargo, el nivel aún elevado sugiere que la política 
+permanece en terreno contractivo en términos reales.
+
+En conjunto, la gráfica permite identificar tres tendencias claras:
+**(i)** expansión monetaria en respuesta a la crisis
+**(ii)** fase de normalización con tasas bajas
+**(iii)** endurecimiento agresivo seguido de estabilización. 
+
+Más allá de los niveles, lo relevante radica en la capacidad del IBR para capturar de manera inmediata y precisa 
+la orientación de la política monetaria, convirtiéndose en un excelente proxy de las condiciones financieras de corto 
+plazo en la economía colombiana.
 
 ```{r Plotly1, echo=FALSE}
 # Para verlo animado* (descomentar para verlo en html)
