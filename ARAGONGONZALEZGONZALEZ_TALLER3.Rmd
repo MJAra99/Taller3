@@ -487,7 +487,7 @@ web scraping.
 ## Literal A (0.7)
 
 Creen un gráfico donde únicamente grafiquen la tasa IBR ON desde el 2020 hasta el final de
-octubre del 2025. Esta deber´a estar en frecuencia diaria.
+octubre del 2025. Esta deberá estar en frecuencia diaria.
 
 **R/:**  Dada la naturaleza de la API del Banco de la República, utilizaremos Web Scraping 
 para obtener los datos de su página sobre el IBR ON. 
@@ -575,7 +575,8 @@ tabla_ibr <- html_doc %>%
 
 head(tabla_ibr)
 ```
-*El IBR ON (Indicador Bancario de Referencia - Overnight, nominal) refleja la tasa a la que 
+_**¿Qué es el IBR ON?**_
+**El IBR ON (Indicador Bancario de Referencia - Overnight, nominal)** refleja la tasa a la que 
 los bancos en Colombia están dispuestos a prestarse  dinero entre sí a corto plazo. 
 Es una tasa no garantizada (unsecured) basada en cotizaciones del mercado interbancario.
 Es referencia para: créditos y productos financieros en Colombia.
@@ -815,8 +816,8 @@ df_sofr <- datos_json$refRates %>%
 head(df_sofr) # Revisamos que todo funciona
 summary(df_sofr)
 ```
-
-*El SOFR (Secured Overnight Financing Rate) representa el costo de pedir prestado dinero a un día 
+_**¿Qué es el SOFR ON?**_
+**El SOFR ON (Secured Overnight Financing Rate)** representa el costo de pedir prestado dinero a un día 
 (overnight) en el mercado de repos de EE. UU., donde los préstamos están garantizados con bonos del 
 Tesoro y hay muy bajo riesgo de crédito. Se usa como referencia para derivados, préstamos y mercados financieros. 
 
@@ -942,16 +943,13 @@ mientras que la tasa IBR se somete a una transformación de reescalamiento tipo 
 Esta transformación ajusta la serie del IBR al rango de valores de la SOFR, lo que permite superponer 
 ambas curvas en un mismo eje sin distorsionar su dinámica relativa. 
 Es importante resaltar que este procedimiento no preserva los niveles absolutos de la IBR, sino que facilita la comparación de tendencias.
-P
-ara mantener la interpretabilidad, se incorpora un eje secundario que revierte la transformación aplicada al IBR, 
+Para mantener la interpretabilidad, se incorpora un eje secundario que revierte la transformación aplicada al IBR, 
 permitiendo visualizar sus valores en su escala original. De esta forma, el eje izquierdo representa la SOFR y 
 el eje derecho la IBR, cada uno en sus respectivas unidades.
 
 Adicionalmente, se definen colores diferenciados para cada serie (azul para SOFR y rojo para IBR), 
 se configuran las escalas temporales del eje X con cortes semestrales y etiquetas en formato de mes y año, 
 y se añaden títulos, subtítulos y notas de fuente que contextualizan el gráfico.
-
-Posteriormente, se guarda la imagen en PNG. 
 
 Así, el resultado es una visualización integrada que permite analizar la evolución comparada de ambas tasas de referencia, enfatizando sus patrones y co-movimientos en el periodo 2020–2025.
 
@@ -1028,21 +1026,22 @@ print(literalC)
 dinámica interna de cada economía, sino también la sincronización —y los desfases— en los ciclos de política monetaria 
 entre una economía desarrollada y una emergente.
 
-En una primera fase (2020), ambas tasas exhiben una caída pronunciada, reflejando respuestas expansivas frente al choque global de la pandemia. 
+En una primera fase, en **2020**, ambas tasas exhiben una caída pronunciada, reflejando respuestas expansivas frente al choque global de la pandemia. 
 Sin embargo, el ajuste es más drástico en Estados Unidos, donde la SOFR converge rápidamente a niveles cercanos a cero, 
 mientras que el IBR, aunque disminuye, se mantiene en niveles superiores. Esto sugiere una mayor restricción estructural en 
 Colombia para llevar la tasa a cero, posiblemente asociada a primas de riesgo, estructura del sistema financiero y consideraciones cambiarias.
 
-Durante 2020–2021, ambas economías mantuvieron tasas bajas para estimular la actividad. Sin embargo, en Estados Unidos la tasa (SOFR) cayó prácticamente a cero, mientras que en Colombia (IBR), aunque disminuyó, se mantuvo por encima de ese nivel. Este diferencial refleja condiciones financieras globales más holgadas en economías avanzadas y una asimetría en el espacio de política monetaria.
+Durante **2020–2021**, ambas economías mantuvieron tasas bajas para estimular la actividad. Sin embargo, en Estados Unidos la tasa (SOFR) cayó prácticamente a cero, mientras que en Colombia (IBR), aunque disminuyó, se mantuvo por encima de ese nivel. Este diferencial refleja condiciones financieras globales más holgadas en economías avanzadas y una asimetría en el espacio de política monetaria.
 
-El punto más relevante del análisis emerge a partir de 2022, cuando inicia el ciclo de endurecimiento monetario. Aquí se observa un alto grado de co-movimiento en tendencia, pero con dos características clave:
+El punto más relevante del análisis emerge a partir de **2022**, cuando inicia el ciclo de endurecimiento monetario. Aquí se observa un alto grado de co-movimiento en tendencia, pero con dos características clave:
 
--*1. Desfase temporal (lag):* la SOFR comienza a incrementarse ligeramente antes que el IBR, lo cual es consistente con el rol de la Reserva Federal como líder del ciclo monetario global. Colombia, como economía pequeña y abierta, responde con cierto rezago, en parte observando las condiciones externas y la evolución del tipo de cambio.
--*2. Diferencial en magnitud:* el incremento del IBR es significativamente más pronunciado, alcanzando niveles superiores al 12%, mientras que la SOFR se estabiliza alrededor del 5%. Esto evidencia una respuesta más agresiva en términos nominales por parte del Banco de la República, coherente con mayores presiones inflacionarias, menor credibilidad inicial de anclaje de expectativas o mayor vulnerabilidad externa.
+*1. Desfase temporal (lag):* la SOFR comienza a incrementarse ligeramente antes que el IBR, lo cual es consistente con el rol de la Reserva Federal como líder del ciclo monetario global. Colombia, como economía pequeña y abierta, responde con cierto rezago, en parte observando las condiciones externas y la evolución del tipo de cambio.
 
-Durante 2023 se observa una fase de convergencia en tendencia, donde ambas tasas alcanzan sus picos y se estabilizan. Este comportamiento sugiere que, pese a diferencias estructurales, los bancos centrales enfrentaron choques inflacionarios similares y respondieron con estrategias de endurecimiento relativamente alineadas en dirección.
+*2. Diferencial en magnitud:* el incremento del IBR es significativamente más pronunciado, alcanzando niveles superiores al 12%, mientras que la SOFR se estabiliza alrededor del 5%. Esto evidencia una respuesta más agresiva en términos nominales por parte del Banco de la República, coherente con mayores presiones inflacionarias, menor credibilidad inicial de anclaje de expectativas o mayor vulnerabilidad externa.
 
-A partir de finales de 2023 y durante 2024–2025, emerge nuevamente una divergencia. La SOFR comienza a ajustarse levemente a la baja, mientras que el IBR inicia una reducción más gradual pero desde niveles considerablemente más altos. Este patrón sugiere que Estados Unidos entra antes en una fase de normalización monetaria mientras que Colombia mantiene una postura más persistentemente restrictiva para consolidar la convergencia inflacionaria y mitigar riesgos cambiarios
+Durante **2023** se observa una fase de convergencia en tendencia, donde ambas tasas alcanzan sus picos y se estabilizan. Este comportamiento sugiere que, pese a diferencias estructurales, los bancos centrales enfrentaron choques inflacionarios similares y respondieron con estrategias de endurecimiento relativamente alineadas en dirección.
+
+A partir de finales de 2023 y durante **2024–2025**, emerge nuevamente una divergencia. La SOFR comienza a ajustarse levemente a la baja, mientras que el IBR inicia una reducción más gradual pero desde niveles considerablemente más altos. Este patrón sugiere que Estados Unidos entra antes en una fase de normalización monetaria mientras que Colombia mantiene una postura más persistentemente restrictiva para consolidar la convergencia inflacionaria y mitigar riesgos cambiarios
 
 Así, la interacción entre las tasas permite entender que el IBR no solo responde a condiciones internas, sino que también está condicionado por el entorno monetario internacional, particularmente por la trayectoria de la SOFR. Sin embargo, el mayor nivel y volatilidad del IBR reflejan que, en economías emergentes, la política monetaria enfrenta restricciones adicionales, lo que se traduce en ciclos más intensos y prolongados.
 
