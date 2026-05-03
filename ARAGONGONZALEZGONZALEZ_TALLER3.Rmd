@@ -628,9 +628,9 @@ Podemos observarlo de manera animada para confirmar que funciona tan bien
 como en la página web de origen (del Banrep).
 
 ```{r Plotly}
-# Para verlo animado*
-library(plotly)
-ggplotly(literalA)
+# Para verlo animado* (descomentar para verlo en html)
+# library(plotly)
+# ggplotly(literalA)
 
 # Confirmamos que quedó correctamente graficada
 # https://suameca.banrep.gov.co/graficador-interactivo/grafica/241
