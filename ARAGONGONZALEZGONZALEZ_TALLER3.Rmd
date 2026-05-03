@@ -660,7 +660,7 @@ literalA <- ggplot(df_ibr, aes(x = Fecha, y = IBR)) +
 print (literalA)
 ```
 
-Se resalta la posibilidad de observar el gráfico de manera animada con el fin confirmar la 
+Se resalta la posibilidad de observar el gráfico de manera animada  (en versiones HTML) con el fin confirmar la 
 réplica exacta de la versión original disponible en la página web del Banrep 
 (disponible aquí: https://suameca.banrep.gov.co/graficador-interactivo/grafica/241). 
 
@@ -688,9 +688,23 @@ ggsave(
 Creen un gráfico donde únicamente grafiquen la tasa SOFR ON desde el 2020 hasta el final de
 octubre del 2025. Esta deberá estar en frecuencia diaria.
 
-**R/:**  Dada la naturaleza de la API de la Reserva Federal, utilizaremos esta misma
-para obtener los datos de su página sobre el SOFR ON. 
+**R/:**  Dada la naturaleza de la API de la Reserva Federal de Nueva York, utilizaremos esta misma
+para consultar y obtener los datos de la serie histórica de la tasa SOFR (Secured Overnight Financing Rate). 
 
+En primer lugar, se referencia la documentación oficial de la API, la cual describe los endpoints disponibles
+y los parámetros necesarios para realizar consultas estructuradas. A partir de esto, 
+se construye la URL de la solicitud de manera modular, separando la raíz del servidor del endpoint específico (path), 
+correspondiente a la búsqueda de tasas SOFR en formato JSON.
+
+Posteriormente, se define una lista de parámetros que delimita el rango temporal de interés, 
+en este caso entre el 1 de enero de 2020 y el 31 de octubre de 2025. 
+Esta parametrización permite realizar consultas dinámicas sin necesidad de modificar directamente la URL.
+
+A continuación, se ejecuta la solicitud HTTP mediante la función GET() del paquete httr, que combina la URL base, 
+el endpoint y los parámetros definidos, generando una petición completa a la API. 
+Finalmente, se verifica el estado de la respuesta, obteniendo un código 200 que indica que la solicitud fue 
+exitosa y que los datos fueron correctamente recuperados, validando así la conexión con la API y 
+permitiendo proceder al procesamiento de la información.
 
 ```{r Ruta de la API, echo=FALSE}
 # Vamos a "construir" el path de la API por partes. 
@@ -712,14 +726,31 @@ respuesta_api <- GET( # Juntamos todo
 
 status_code(respuesta_api)  # debería ser 200 (lo es!)                           
 
-¿Cómo sería el link completo? (el Request URL lo da la página de la FED)
+#¿Cómo sería el link completo? (el Request URL lo da la página de la FED)
 url_api_FED <- "https://markets.newyorkfed.org/api/rates/secured/sofr/search.json?startDate=2020-01-01&endDate=2025-10-31"
 respuesta_api <- GET(url_api_FED)
 status_code(respuesta_api)  # debería ser 200
 ```
+Posteriormente se realiza la transformación de la respuesta obtenida desde la API en un conjunto de 
+datos estructurado y listo para análisis. Este proceso se realiza con ayuda de la 
+inteligencia artificial generativa ChatGPT, y su proceso se documenta en el documento adjunto. 
 
-Obtenemos...
+En primer lugar, el contenido de la respuesta se extrae en formato texto, especificando la codificación 
+UTF-8 para asegurar una correcta interpretación de los caracteres. Posteriormente, este texto en 
+formato JSON se convierte a una estructura de datos en R, lo que permite acceder de manera organizada a sus distintos componentes.
 
+A continuación, se extrae específicamente la sección "refRates", que contiene la información de la tasa SOFR, 
+y se procede a construir un dataframe. En este proceso, se transforman las variables clave: 
+la fecha se convierte a formato Date, facilitando su uso en análisis temporales, y la tasa se convierte a formato numérico,
+permitiendo su tratamiento como variable continua.
+
+Seguidamente, se seleccionan únicamente las variables relevantes (Fecha y SOFR), eliminando información redundante, 
+y se ordenan las observaciones cronológicamente desde la más antigua hasta la más reciente. 
+Cabe señalar que, al tratarse de una tasa overnight, la serie es diaria pero únicamente para días hábiles,
+lo cual es consistente con la dinámica del mercado financiero.
+
+Luego de ello, se verifica la correcta estructura, contenido y comportamiento básico de los datos antes 
+de proceder con su análisis y visualización.
 
 ```{r Obtener y limpiar los datos, echo=FALSE}
 # Procesamos JSON (la info. extraida a formato modificable en R)
@@ -741,15 +772,13 @@ df_sofr <- datos_json$refRates %>%
 head(df_sofr) # Revisamos que todo funciona
 summary(df_sofr)
 ```
-Obtenemos la tabla del SOFR ON. 
 
-# SOFR (Secured Overnight Financing Rate)
-# Representa el costo de pedir prestado dinero a un día (overnight) en el mercado de repos de EE. UU.
-# donde los préstamos están garantizados con bonos del Tesoro y hay muy bajo riesgo de crédito.
-# Se usa como referencia para derivados, préstamos y mercados financieros. 
+*El SOFR (Secured Overnight Financing Rate) representa el costo de pedir prestado dinero a un día 
+(overnight) en el mercado de repos de EE. UU., donde los préstamos están garantizados con bonos del 
+Tesoro y hay muy bajo riesgo de crédito. Se usa como referencia para derivados, préstamos y mercados financieros. 
 
-
-Finalmente, graficamos. 
+Finalmente, se grafica utilizando todos los elementos estéticos necesarios para mostrar una gráfica 
+completa y detallada.
 
 ```{r Graficamos, echo=FALSE}
 # Graficamos
@@ -786,17 +815,15 @@ literalB <- ggplot(df_sofr, aes(x = Fecha, y = SOFR)) +
 print (literalB)
 ```
 
-Podemos observarlo de manera animada para confirmar que funciona tan bien 
-como en la página web de origen (de la Reserva Federal).
+Se resalta la posibilidad de observar el gráfico de manera animada (en versiones HTML) con el fin confirmar la 
+réplica exacta de la versión original disponible en la página web del Banrep 
+(disponible aquí: https://www.newyorkfed.org/markets/reference-rates/sofr). 
 
 ```{r Plotly2, echo=FALSE}
 # Para verlo animado* (descomentar para verlo en html)
 # library(plotly)
 # ggplotly(literalB)
 ```
-Igualmente, confirmamos que quedó correctamente graficada. Accedemos a la gráfica 
-original a través del enlace: https://www.newyorkfed.org/markets/reference-rates/sofr
-
 Finalmente, se guarda la imagen en formato png. 
 
 ```{r Guardado de imagen2, include=FALSE}
@@ -812,7 +839,7 @@ ggsave(
 ```
 
 ## Literal C (0,6)
-Creen un gr´afico de doble eje, donde el eje derecho represente la tasa IBR y el eje izquierdo
+Creen un gráfico de doble eje, donde el eje derecho represente la tasa IBR y el eje izquierdo
 represente la tasa SOFR. Realicen un análisis breve sobre este gráfico comparando las tendencias
 observadas en ambas tasas. Esta gráfica puede estar en la frecuencia que ustedes deseen.
 
@@ -823,6 +850,28 @@ mostrar una gráfica completa y detallada.
 uso de doble eje implica una transformación de escala, por lo que la comparación debe centrarse 
 en tendencias más que en niveles absolutos.
 
+En primer lugar, se realiza la unión de las bases de datos previamente empleadas para graficar las series 
+IBR ON y SOFR ON a través de un inner_join por la variable Fecha. Este tipo de unión garantiza que únicamente 
+se conserven las observaciones coincidentes en ambas series, permitiendo una comparación temporal 
+consistente entre las tasas de referencia de Estados Unidos y Colombia.
+
+A continuación, se representan ambas series en una misma figura. La tasa SOFR se grafica en su escala original, 
+mientras que la tasa IBR se somete a una transformación de reescalamiento tipo min-max. 
+Esta transformación ajusta la serie del IBR al rango de valores de la SOFR, lo que permite superponer 
+ambas curvas en un mismo eje sin distorsionar su dinámica relativa. 
+Es importante resaltar que este procedimiento no preserva los niveles absolutos de la IBR, sino que facilita la comparación de tendencias.
+P
+ara mantener la interpretabilidad, se incorpora un eje secundario que revierte la transformación aplicada al IBR, 
+permitiendo visualizar sus valores en su escala original. De esta forma, el eje izquierdo representa la SOFR y 
+el eje derecho la IBR, cada uno en sus respectivas unidades.
+
+Adicionalmente, se definen colores diferenciados para cada serie (azul para SOFR y rojo para IBR), 
+se configuran las escalas temporales del eje X con cortes semestrales y etiquetas en formato de mes y año, 
+y se añaden títulos, subtítulos y notas de fuente que contextualizan el gráfico.
+
+Posteriormente, se guarda la imagen en PNG. 
+
+Así, el resultado es una visualización integrada que permite analizar la evolución comparada de ambas tasas de referencia, enfatizando sus patrones y co-movimientos en el periodo 2020–2025.
 
 ```{r Unión y modificación y gráfica de las bases, include=FALSE}
 #Unimos las bases para graficar
@@ -893,8 +942,7 @@ literalC <- ggplot(df_merge, aes(x = Fecha)) +
 print(literalC)
 
 ```
-
-Finalmente, se guarda la imagen en formato png. 
+- Interpretación:
 
 ```{r Guardado de imagen, include=FALSE}
 # Finalmente, guardamos la imagen en formato PNG
