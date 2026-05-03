@@ -671,7 +671,7 @@ réplica exacta de la versión original disponible en la página web del Banrep
 ```
 Finalmente, se guarda la imagen en formato png. 
 
-```{r Guardado de imagen, include=FALSE}
+```{r Guardado de imagen1, include=FALSE}
 # Finalmente, guardamos la imagen en formato PNG
 ggsave(
   filename = "outputs/graficos/literalA.png",
@@ -798,7 +798,7 @@ original a través del enlace: https://www.newyorkfed.org/markets/reference-rate
 
 Finalmente, se guarda la imagen en formato png. 
 
-```{r Guardado de imagen, include=FALSE}
+```{r Guardado de imagen2, include=FALSE}
 # Finalmente, guardamos la imagen en formato PNG
 ggsave(
   filename = "outputs/graficos/literalB.png",
