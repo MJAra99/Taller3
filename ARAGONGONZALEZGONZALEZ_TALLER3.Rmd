@@ -492,7 +492,7 @@ octubre del 2025. Esta deber´a estar en frecuencia diaria.
 **R/:**  Dada la naturaleza de la API del Banco de la República, utilizaremos Web Scraping 
 para obtener los datos de su página sobre el IBR ON. 
 
-```{r Scraping Ético}
+```{r Scraping Ético, echo=FALSE}
 # Empezamos por preguntarle a la página web si la podemos scrapear
 
 # Scraping "Educado"
@@ -511,7 +511,7 @@ print(sesion_educada) # Muestra el estatus y el delay permitido. Podemos scrapea
 Una vez confirmado que podemos hacer scraping, evaluaremos el tipo de web
 a la que nos enfrentamos. Esta es una página dinámica. 
 
-```{r Scrapeamos}
+```{r Scrapeamos, , echo=FALSE}
 # Nota: Esta página usa Oracle Analytics, requiere interacción del navegador.
 
 # Iniciamos sesión de Chrome y abrir visor
@@ -559,7 +559,7 @@ Es referencia para: créditos y productos financieros en Colombia.
 
 Ahora vamos con la limpieza de datos. 
 
-```{r Limpieza de datos}
+```{r Limpieza de datos, include=FALSE}
 # Limpiamos los datos
 df_ibr <- tabla_ibr %>%
   
@@ -583,7 +583,7 @@ df_ibr <- tabla_ibr %>%
 
 Finalmente, graficamos. 
 
-```{r Gráfico Literal A}
+```{r Gráfico Literal A, echo=FALSE}
 # Graficamos
 literalA <- ggplot(df_ibr, aes(x = Fecha, y = IBR)) +
   
@@ -627,7 +627,7 @@ print (literalA)
 Podemos observarlo de manera animada para confirmar que funciona tan bien 
 como en la página web de origen (del Banrep).
 
-```{r Plotly}
+```{r Plotly, echo=FALSE}
 # Para verlo animado* (descomentar para verlo en html)
 # library(plotly)
 # ggplotly(literalA)
@@ -638,7 +638,7 @@ como en la página web de origen (del Banrep).
 ```
 Y guardamos la imagen en formato png. 
 
-```{r Guardado de imagen}
+```{r Guardado de imagen, include=FALSE}
 # Finalmente, guardamos la imagen en formato PNG
 ggsave(
   filename = "outputs/graficos/literalA.png",
