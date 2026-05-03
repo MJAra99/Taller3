@@ -492,6 +492,14 @@ octubre del 2025. Esta deber´a estar en frecuencia diaria.
 **R/:**  Dada la naturaleza de la API del Banco de la República, utilizaremos Web Scraping 
 para obtener los datos de su página sobre el IBR ON. 
 
+Así, en primer lugar, se define la URL objetivo, que corresponde al sitio donde se encuentra 
+alojada la información económica a extraer. Posteriormente, se implementa un enfoque de
+“scraping educado” mediante la función bow() del paquete polite, la cual permite verificar las 
+condiciones de acceso establecidas por el archivo robots.txt del sitio web. 
+Este paso es fundamental, ya que determina si el scraping está permitido, bajo qué restricciones 
+debe realizarse y cuál es el comportamiento adecuado del usuario frente al servidor.  Una vez confirmado
+que el acceso es permitido a los datos, es posible continuar con la extracción de datos de manera responsable.
+
 ```{r Scraping Ético, echo=FALSE}
 # Empezamos por preguntarle a la página web si la podemos scrapear
 
@@ -508,8 +516,25 @@ sesion_educada <- bow(
 print(sesion_educada) # Muestra el estatus y el delay permitido. Podemos scrapear
 ```
 
-Una vez confirmado que podemos hacer scraping, evaluaremos el tipo de web
-a la que nos enfrentamos. Esta es una página dinámica. 
+Ahora bien, se identifica que los datos provienen de una web dinámica del Banco de la República 
+que utiliza Oracle Analytics, lo cual requiere interacción con el navegador para poder acceder 
+a la tabla de información del IBR.
+
+Así, para extraer los datos, en primer lugar, se inicia una sesión de navegador automatizado 
+mediante ChromoteSession, lo que permite simular la interacción de un usuario real en un entorno tipo Chrome headless. 
+Esta sesión se abre con view() para inspección y depuración visual del proceso de scraping. 
+
+Posteriormente, se navega a la URL objetivo del IBR. A continuación, se ejecuta código JavaScript 
+directamente dentro de la página mediante con el objetivo de interactuar con la interfaz gráfica del sitio. 
+En este caso específico, se simula un clic sobre el botón correspondiente a la pestaña “Vista tabla”, 
+lo cual permite revelar la estructura tabular de los datos que no está disponible en el HTML inicial.
+
+Luego de esperar nuevamente la carga completa del contenido dinámico, se extrae el DOM completo de la página,
+obteniendo así el código HTML actualizado tras la interacción. Este HTML se convierte a un objeto manipulable en R.
+
+Finalmente, se localiza la tabla dentro del DOM identificando su nodo específico y se convierte directamente 
+en un dataframe para procesar. Este proceso permite estructurar la información del IBR en un formato tabular 
+para su posterior limpieza y análisis.
 
 ```{r Scrapeamos, , echo=FALSE}
 # Nota: Esta página usa Oracle Analytics, requiere interacción del navegador.
@@ -550,14 +575,10 @@ tabla_ibr <- html_doc %>%
 
 head(tabla_ibr)
 ```
-Obtenemos la tabla del IBR ON. 
-
 *El IBR ON (Indicador Bancario de Referencia - Overnight, nominal) refleja la tasa a la que 
 los bancos en Colombia están dispuestos a prestarse  dinero entre sí a corto plazo. 
 Es una tasa no garantizada (unsecured) basada en cotizaciones del mercado interbancario.
 Es referencia para: créditos y productos financieros en Colombia.
-
-Ahora vamos con la limpieza de datos. 
 
 ```{r Limpieza de datos, include=FALSE}
 # Limpiamos los datos
@@ -580,8 +601,22 @@ df_ibr <- tabla_ibr %>%
     Fecha <= as.Date("2025-10-31")
   )
 ```
+Posteriormente, se realiza la depuración del conjunto de datos final del IBR a partir de la tabla 
+previamente extraída desde el Banco de la República.
 
-Finalmente, graficamos. 
+En primer lugar, se seleccionan únicamente las variables de interés dentro de la tabla original: 
+la fecha de observación y el valor del Indicador Bancario de Referencia (IBR) overnight nominal. 
+En este proceso, ambas columnas son renombradas para facilitar su uso posterior, estandarizando los 
+nombres, lo cual mejora la legibilidad del análisis.
+
+Posteriormente, se lleva a cabo la transformación de tipos de datos a fecha (para la fecha) y numérica (IBR) según corresponde.
+Finalmente, se aplica un filtro de depuración de la base de datos. Se eliminan observaciones con valores 
+de fecha faltantes y se restringe el periodo de análisis entre el 1 de enero de 2020 y el 31 de octubre de 2025. 
+Este recorte temporal permite garantizar consistencia en la comparación de la serie y alinearla con el horizonte de análisis del estudio.
+
+Finalmente, se grafica utilizando todos los elementos estéticos necesarios para mostrar una gráfica 
+completa y detallada.
+. 
 
 ```{r Gráfico Literal A, echo=FALSE}
 # Graficamos
@@ -624,20 +659,17 @@ literalA <- ggplot(df_ibr, aes(x = Fecha, y = IBR)) +
 
 print (literalA)
 ```
-Podemos observarlo de manera animada para confirmar que funciona tan bien 
-como en la página web de origen (del Banrep).
+Se resalta la posibilidad de observar el gráfico de manera animada con el fin confirmar la 
+réplica exacta de la versión original disponible en la página web del Banrep 
+(disponible aquí: https://suameca.banrep.gov.co/graficador-interactivo/grafica/241). 
+
 
 ```{r Plotly, echo=FALSE}
 # Para verlo animado* (descomentar para verlo en html)
 # library(plotly)
 # ggplotly(literalA)
 ```
-
-Igualmente, confirmamos que quedó correctamente graficada. Accedemos a la gráfica 
-original a través del enlace: https://suameca.banrep.gov.co/graficador-interactivo/grafica/241
-
-```
-Y guardamos la imagen en formato png. 
+Finalmente, se guarda la imagen en formato png. 
 
 ```{r Guardado de imagen, include=FALSE}
 # Finalmente, guardamos la imagen en formato PNG
