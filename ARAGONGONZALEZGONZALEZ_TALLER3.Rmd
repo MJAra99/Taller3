@@ -474,3 +474,10 @@ mapa_leaflet
 **R/:** Para la elaboración del mapa nos topamos con un problema computacional...
 
 # Ejercicio 2: Web Scraping y Uso de API (2.0)
+
+Para este ejercicio, deberán extraer información del Banco de la República de Colombia y de la
+Reserva Federal de los Estados Unidos. Podrán hacerlo tanto por medio de API como por medio de
+web scraping.
+
+
+
