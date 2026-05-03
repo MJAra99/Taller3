@@ -63,6 +63,16 @@ install_if_missing(required_packages)
 lapply(required_packages, library, character.only = TRUE)
 
 
+#  Configuración del directorio de trabajo ----------------------------------
+# Obtener usuario del sistema para crear ruta dinámica
+username <- Sys.getenv("USERNAME")
+
+# Construir ruta hacia los datos usando el usuario actual
+path_taller <- paste0("C:/Users/", username, "/Desktop/ECONOMÍA 2026-1/Taller de Programación R/Taller 3/Taller 3/Taller3-main")
+
+# Establecer directorio de trabajo
+setwd(path_taller)
+
 ```
 
 ```{r Cargar datos}
@@ -351,9 +361,9 @@ El IDF (Índice de Desempeño Fiscal) es un indicador elaborado por el Departame
 
 El IDF mide varias variables financieras clave, entre ellas: los ingresos totales, los gastos de funcionamiento, el ahorro corriente, el nivel de endeudamiento y la capacidad de inversión y de ejecución. Estas variables se agrupan en dimensiones como resultados fiscales y gestión financiera, permitiendo evaluar si la entidad gasta de forma eficiente, mantiene su deuda bajo control y genera recursos para inversión pública y formación de capital.
 
-Como se puede ver en los mapas anteriores, la mayoría de los departamentos se encuentran en la categoría de riesgo (54.55%) y solo dos departamentos (Bogotá y Atlántico) se encuentran en la categoría Solvente.Los departamentos con peor desempeño son Caquetá y Vichada.
+Como se observa en los mapas anteriores, la mayoría de los departamentos se encuentran en la categoría de riesgo (54.55%) y solo dos departamentos (Bogotá y Atlántico) se encuentran en la categoría Solvente. Los departamentos con peor desempeño son Caquetá y Vichada.
 
-En general, se observa un mejor desempeño en los departamentos con ciudades  principales, lo cual puede estar explicado por mayores ingresos no dependientes de transferencia y una mayor y eficiente ejecución de las inversiones públicas.
+En general, se identifica un mejor desempeño en los departamentos con ciudades  principales, lo cual puede estar explicado por mayores ingresos no dependientes de transferencia y una mayor y eficiente ejecución de las inversiones públicas.
 
 ## Literal B (0.5)
 
@@ -483,11 +493,11 @@ mapa_leaflet <- leaflet(sf_dataM) %>%
 mapa_leaflet
 ```
 
-**R/:** Para la elaboración del mapa nos topamos con un problema computacional al intentar usar `ggplotly`, pues se demoraba demasiado en renderizar los polígonos correspondientes a los más de 1,100 municipios y posteriormente aplicar el relleno con base en el IDF. Inicialmente, con base en el código de la clase y con ayuda de la IA generativa *Gemini* construimos los primeros mapas con base en un widget html que permitiera el hoover con la leyenda correspondiente, lo cual funcionó bastante bien para los departamentos, pero no estaba logrando renderizar para los municipios. Por lo anterior le pedimos a la IA que nos ayudara a generar eficiencias con base en los mapas hechos con `leaflet` (vistos en clase). Con esto, nos recomentó también disminuir el detalle de los polígonos de los municipios, ya que no era necesario tanto detalle para los mapas del taller.
+**R/:** Para la elaboración del mapa se enfrentó un problema computacional al intentar usar `ggplotly`, pues se demoraba demasiado en renderizar los polígonos correspondientes a los más de 1,100 municipios y posteriormente aplicar el relleno con base en el IDF. Inicialmente, con base en el código de la clase y con ayuda de la IA generativa **Gemini** se construyó los primeros mapas con base en un widget html que permitiera el hoover con la leyenda correspondiente, lo cual funcionó adecuadamente para los departamentos, pero no lograba renderizar para los municipios. Por lo anterior, se solicitó a la IA que ayudara a generar eficiencias con base en los mapas hechos con `leaflet` (vistos en clase). Con esto, la IA recomentó también disminuir el detalle de los polígonos de los municipios, ya que no era necesario tanto detalle para los mapas del taller.
 
-Como resultados construimos los mapas anteriores y decidimos utilizar el mismo código para optimizar los de los departamentos, de manera que el código renderizara más rápido.
+Como resultados se construyeron los mapas anteriores y se decidió utilizar el mismo código para optimizar los de los departamentos, de manera que el código renderizara más rápido.
 
-A continuación, presentamos unas tablas con los resultados principales para el IDF a nivel municipal:
+A continuación, se presentan las tablas de los resultados principales para el IDF a nivel municipal:
 
 ```{r tabla3}
 tabla_cat2 <- datasummary(
@@ -552,9 +562,9 @@ Ahora bien, se identifica que los datos provienen de una web dinámica del Banco
 
 Así, para extraer los datos, en primer lugar, se inicia una sesión de navegador automatizado mediante ChromoteSession, lo que permite simular la interacción de un usuario real en un entorno tipo Chrome headless. Esta sesión se abre con view() para inspección y depuración visual del proceso de scraping.
 
-Posteriormente, se navega a la URL objetivo del IBR. A continuación, se ejecuta código JavaScript directamente dentro de la página mediante con el objetivo de interactuar con la interfaz gráfica del sitio. En este caso específico, se simula un clic sobre el botón correspondiente a la pestaña “Vista tabla”, lo cual permite revelar la estructura tabular de los datos que no está disponible en el HTML inicial.
+Posteriormente, se navega a la URL objetivo del IBR. A continuación, se ejecuta código JavaScript directamente dentro de la página mediante con el objetivo de interactuar con la interfaz gráfica del sitio. En este caso específico, se simula un clic sobre el botón correspondiente a la pestaña “Vista tabla”, lo cual permite revelar la estructura tabular de los datos que no está disponible en el HTML inicial. 
 
-Luego de esperar nuevamente la carga completa del contenido dinámico, se extrae el DOM completo de la página, obteniendo así el código HTML actualizado tras la interacción. Este HTML se convierte a un objeto manipulable en R.
+Luego de esperar nuevamente la carga completa del contenido dinámico, se extrae el DOM completo de la página, obteniendo así el código HTML actualizado tras la interacción. Este HTML se convierte a un objeto manipulable en R. Es importante destacar que este proceso se realizó con el apoyo de la IA **ChatGPT** (cuyo proceso está documentado en los archivos anexos). 
 
 Finalmente, se localiza la tabla dentro del DOM identificando su nodo específico y se convierte directamente en un dataframe para procesar. Este proceso permite estructurar la información del IBR en un formato tabular para su posterior limpieza y análisis.
 
@@ -581,7 +591,7 @@ navegador$Runtime$evaluate(codigo_js) # Le damos click al botón
 Sys.sleep(40) #Esperamos a que cargue
 
 
-# Extraemos el código fuente DOM actual y procesarlo (con ayuda de la IA)
+# Extraemos el código fuente DOM actual y procesarlo (con ayuda de la IA ChatGPT)
 html_dinamico <- navegador$Runtime$evaluate(
   "document.documentElement.outerHTML"
 )$result$value
@@ -678,6 +688,12 @@ print (literalA)
 
 \*Se resalta la posibilidad de observar el gráfico de manera animada (en versiones HTML) con el fin confirmar la réplica exacta de la versión original disponible en la página web del Banrep (disponible aquí: <https://suameca.banrep.gov.co/graficador-interactivo/grafica/241>).
 
+```{r Plotly1, echo=FALSE}
+# Para verlo animado* (descomentar para verlo en html)
+# library(plotly)
+# ggplotly(literalA)
+```
+
 **Interpretación:** la dinámica observada en la serie del IBR overnight para el periodo 2020–2025 refleja con bastante claridad la transmisión de la política monetaria del Banco de la República frente a choques macroeconómicos sucesivos, particularmente la pandemia y el posterior episodio inflacionario.
 
 En una primera fase (primer semestre de 2020), se identifica una reducción abrupta de la tasa, pasando de niveles cercanos al 4% a valores por debajo del 2%. Este comportamiento es consistente con una política monetaria expansiva contracíclica, orientada a mitigar la caída de la actividad económica derivada del choque exógeno del COVID-19. La disminución del IBR, como tasa interbancaria de referencia, refleja una relajación de las condiciones de liquidez y un abaratamiento del costo del dinero en el corto plazo.
@@ -693,12 +709,6 @@ Finalmente, desde mediados de 2023 en adelante, se evidencia una fase de estabil
 En conjunto, la gráfica permite identificar tres tendencias claras: **(i)** expansión monetaria en respuesta a la crisis **(ii)** fase de normalización con tasas bajas **(iii)** endurecimiento agresivo seguido de estabilización.
 
 Más allá de los niveles, se destaca la capacidad del IBR para capturar de manera inmediata y precisa la orientación de la política monetaria, convirtiéndose en un excelente proxy de las condiciones financieras de corto plazo en la economía colombiana.
-
-```{r Plotly1, echo=FALSE}
-# Para verlo animado* (descomentar para verlo en html)
-# library(plotly)
-# ggplotly(literalA)
-```
 
 Finalmente, se guarda la imagen en formato png.
 
@@ -831,6 +841,12 @@ print (literalB)
 
 \*Se resalta la posibilidad de observar el gráfico de manera animada (en versiones HTML) con el fin confirmar la réplica exacta de la versión original disponible en la página web del Banrep (disponible aquí: <https://www.newyorkfed.org/markets/reference-rates/sofr>).
 
+```{r Plotly2, echo=FALSE}
+# Para verlo animado* (descomentar para verlo en html)
+# library(plotly)
+# ggplotly(literalB)
+```
+
 **Interpretación:** la trayectoria del SOFR overnight entre 2020 y 2025 refleja con alta fidelidad la orientación de la política monetaria de la Reserva Federal y, en particular, su respuesta a dos regímenes macroeconómicos claramente diferenciados: el choque pandémico y el posterior episodio inflacionario global.
 
 En una primera fase (primer trimestre de 2020), se observa una caída abrupta de la tasa hacia niveles cercanos a cero. Este comportamiento es consistente con una intervención de emergencia por parte de la Reserva Federal, que redujo agresivamente su tasa de referencia y expandió la liquidez del sistema financiero. Dado que el SOFR es una tasa basada en transacciones efectivas en el mercado de repos respaldados por bonos del Tesoro, su descenso inmediato evidencia una transmisión casi perfecta de la política monetaria hacia las condiciones de financiamiento de muy corto plazo. En este contexto, el objetivo fue evitar disrupciones en el sistema financiero y sostener el crédito en un entorno de alta incertidumbre.
@@ -845,11 +861,6 @@ Finalmente, en 2025 se observa una leve corrección a la baja, aunque sin retorn
 
 Dicho esto, el SOFR no solo refleja la dirección de la política monetaria, sino también su intensidad, credibilidad y velocidad de transmisión. La claridad de los regímenes observados (expansión extrema, estabilidad, endurecimiento agresivo y estabilización restrictiva) evidencia un mecanismo de transmisión altamente eficiente, donde las decisiones del banco central parecen traducirse casi instantáneamente en las condiciones del mercado monetario.
 
-```{r Plotly2, echo=FALSE}
-# Para verlo animado* (descomentar para verlo en html)
-# library(plotly)
-# ggplotly(literalB)
-```
 
 Finalmente, se guarda la imagen en formato png.
 
