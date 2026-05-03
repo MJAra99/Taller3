@@ -702,7 +702,7 @@ En conjunto, la gráfica permite identificar tres tendencias claras:
 **(ii)** fase de normalización con tasas bajas
 **(iii)** endurecimiento agresivo seguido de estabilización. 
 
-Más allá de los niveles, lo relevante radica en la capacidad del IBR para capturar de manera inmediata y precisa 
+Más allá de los niveles, se destaca la capacidad del IBR para capturar de manera inmediata y precisa 
 la orientación de la política monetaria, convirtiéndose en un excelente proxy de las condiciones financieras de corto 
 plazo en la economía colombiana.
 
@@ -859,9 +859,47 @@ literalB <- ggplot(df_sofr, aes(x = Fecha, y = SOFR)) +
 print (literalB)
 ```
 
-Se resalta la posibilidad de observar el gráfico de manera animada (en versiones HTML) con el fin confirmar la 
+*Se resalta la posibilidad de observar el gráfico de manera animada (en versiones HTML) con el fin confirmar la 
 réplica exacta de la versión original disponible en la página web del Banrep 
 (disponible aquí: https://www.newyorkfed.org/markets/reference-rates/sofr). 
+
+**Interpretación:** la trayectoria del SOFR overnight entre 2020 y 2025 refleja con alta fidelidad la orientación de 
+la política monetaria de la Reserva Federal y, en particular, su respuesta a dos regímenes macroeconómicos claramente 
+diferenciados: el choque pandémico y el posterior episodio inflacionario global.
+
+En una primera fase (primer trimestre de 2020), se observa una caída abrupta de la tasa hacia niveles cercanos a cero. 
+Este comportamiento es consistente con una intervención de emergencia por parte de la Reserva Federal, 
+que redujo agresivamente su tasa de referencia y expandió la liquidez del sistema financiero. Dado que el SOFR es 
+una tasa basada en transacciones efectivas en el mercado de repos respaldados por bonos del Tesoro, 
+su descenso inmediato evidencia una transmisión casi perfecta de la política monetaria hacia las condiciones de financiamiento 
+de muy corto plazo. En este contexto, el objetivo fue evitar disrupciones en el sistema financiero y sostener el 
+crédito en un entorno de alta incertidumbre.
+
+Durante el periodo 2020–2021, la tasa permanece en niveles persistentemente bajos, caracterizandose por abundante liquidez 
+y un entorno propicio para la recuperación económica. La estabilidad del SOFR en este rango sugiere que el mercado internalizó 
+plenamente la señal de la autoridad monetaria de mantener condiciones expansivas por un periodo prolongado.
+
+A partir de inicios de 2022, se identifica un cambio de régimen marcado, con un incremento rápido y escalonado de la tasa. 
+Este comportamiento responde al inicio del ciclo de endurecimiento monetario más agresivo en décadas, 
+impulsado por presiones inflacionarias elevadas y persistentes. La pendiente pronunciada de la serie refleja no solo 
+la magnitud de los ajustes, sino también su frecuencia, lo que indica una estrategia deliberada de la Reserva Federal 
+para re-anclar expectativas de inflación y recuperar credibilidad.
+
+Es relevante notar que el ajuste se da en forma de escalones discretos, lo cual coincide con el calendario 
+de decisiones del FOMC (Comité Federal de Mercado Abierto). Esto confirma que el SOFR actúa como un instrumento altamente sensible
+y contemporáneo a la tasa de política, incorporando rápidamente la información de cada decisión. En términos de microestructura,
+esto sugiere un mercado de repos profundo, líquido y con fricciones mínimas.
+Hacia finales de 2023 y durante 2024, la tasa alcanza una meseta en niveles elevados (alrededor de 5%), lo que indica una 
+fase de política monetaria restrictiva sostenida. Este periodo puede interpretarse como un intento de la Reserva Federal de 
+mantener condiciones financieras suficientemente contractivas para asegurar la convergencia de la inflación hacia su objetivo.
+
+Finalmente, en 2025 se observa una leve corrección a la baja, aunque sin retornar a niveles bajos. Esto sugiere el inicio 
+de una posible fase de normalización, donde la política comienza a relajarse gradualmente en respuesta a señales de desaceleración 
+económica o moderación inflacionaria. Sin embargo, el hecho de que la tasa permanezca relativamente alta indica que la postura monetaria 
+sigue siendo, en términos reales, restrictiva.
+
+Dicho esto, el SOFR no solo refleja la dirección de la política monetaria, sino también su intensidad, credibilidad y velocidad de transmisión. 
+La claridad de los regímenes observados (expansión extrema, estabilidad, endurecimiento agresivo y estabilización restrictiva) evidencia un mecanismo de transmisión altamente eficiente, donde las decisiones del banco central parecen traducirse casi instantáneamente en las condiciones del mercado monetario.
 
 ```{r Plotly2, echo=FALSE}
 # Para verlo animado* (descomentar para verlo en html)
