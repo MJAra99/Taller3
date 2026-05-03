@@ -19,7 +19,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-**Nota sobre uso de IA:** Se anexa un documento adicional con las conversaciones sostenidas con agentes de IA en caso de que se hayan utilizado para desarrollar el taller.
+**Nota sobre uso de IA:** Se anexan los documentos adicionales con las conversaciones sostenidas con agentes de IA según el punto en el que se hayan utilizado para desarrollar el taller.
 
 # Ejercicio 1: Datos Geoespaciales (1.5 puntos)
 
