@@ -652,14 +652,12 @@ literalA <- ggplot(df_ibr, aes(x = Fecha, y = IBR)) +
   
   # Tema + fondo blanco
   theme_minimal() +
-theme(
-    axis.text.x = element_text(angle = 45, hjust = 1),
-    legend.position = "bottom"
-  )+
   theme(
     panel.background = element_rect(fill = "white", color = NA),
-    plot.background = element_rect(fill = "white", color = NA)
+    plot.background = element_rect(fill = "white", color = NA),
+    axis.text.x = element_text(angle = 45, hjust = 1)
   )
+
 
 print (literalA)
 ```
@@ -811,13 +809,10 @@ literalB <- ggplot(df_sofr, aes(x = Fecha, y = SOFR)) +
   
   # Tema + fondo blanco
   theme_minimal() +
-theme(
-    axis.text.x = element_text(angle = 45, hjust = 1),
-    legend.position = "bottom"
-  )+
   theme(
     panel.background = element_rect(fill = "white", color = NA),
-    plot.background = element_rect(fill = "white", color = NA)
+    plot.background = element_rect(fill = "white", color = NA),
+    axis.text.x = element_text(angle = 45, hjust = 1)
   )
 
 print (literalB)
