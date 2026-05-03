@@ -995,3 +995,56 @@ ggsave(
 
 write.csv(df_sofr, "df_sofr.csv", row.names = FALSE)
 ```
+
+
+# Ejercicio 3. Aplicativo Shiny Interactivo
+
+En este ejercicio se desarrolla un aplicativo en **Shiny** que incorpora herramientas interactivas adicionales sobre la información construida en los puntos anteriores. El aplicativo está organizado en **tres pestañas**, una correspondiente a cada literal solicitado.
+
+## Literal A. Índice de Desempeño Fiscal (0,5)
+
+Con base en la información construida en el Punto 1, se implementa un **mapa interactivo del Índice de Desempeño Fiscal (IDF)** por departamento para Colombia. Adicionalmente, el usuario puede seleccionar un departamento específico, lo que despliega:
+
+- El valor del IDF departamental.  
+- Su posición relativa a nivel nacional.  
+- El **top 3 de municipios con mejor IDF** dentro del departamento seleccionado.  
+- La distribución municipal del indicador para analizar heterogeneidad interna.
+
+## Literal B. IBR y SOFR (0,5)
+
+Con la información construida en el Punto 2, se transforma el gráfico de doble eje entre las tasas **IBR ON** (Colombia) y **SOFR ON** (Estados Unidos) en una visualización interactiva.
+
+Además, se incorpora un campo donde el usuario puede seleccionar una fecha específica para consultar las tasas observadas y calcular automáticamente la **tasa de devaluación implícita**, utilizando la siguiente expresión:
+
+\[
+\pi = \frac{1+i_d}{1+i_e}-1
+\]
+
+Donde:
+
+- \(\pi\): tasa de devaluación implícita  
+- \(i_d\): tasa de interés doméstica (IBR ON)  
+- \(i_e\): tasa de interés externa (SOFR ON)
+
+## Literal C. Tiroteos en Estados Unidos (0,5)
+
+En la tercera pestaña se desarrolla libremente un panel interactivo utilizando información de **The Violence Project**, base histórica sobre tiroteos masivos ocurridos en Estados Unidos entre 1966 y 2023.
+
+El módulo incluye:
+
+- Visualización geográfica interactiva por estado.  
+- Filtros por rango de años y género del agresor.  
+- Gráficos en **plotly** sobre tendencias, perfiles demográficos y motivaciones.  
+- Widgets de control para personalizar la exploración.  
+- Un cuadro descriptivo que explica el contenido de la base y los objetivos analíticos del panel.
+
+## Nota importante sobre la ejecución
+
+Debido a la naturaleza de **Shiny** y **R Markdown**, la aplicación fue desarrollada en un archivo independiente (`app.R` o script equivalente), ya que los componentes reactivos no siempre se integran adecuadamente dentro del flujo tradicional de compilación de Markdown.
+
+Por esta razón, para ejecutar correctamente el ejercicio se recomienda:
+
+1. Correr previamente este archivo `.Rmd`, donde se generan y organizan las bases de datos necesarias.  
+2. Posteriormente, abrir y ejecutar **completamente** el script del aplicativo Shiny en una sesión activa de RStudio.
+
+De esta manera, los objetos creados en el documento estarán disponibles para el correcto funcionamiento de la aplicación.
