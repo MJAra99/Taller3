@@ -771,7 +771,7 @@ respuesta_api <- GET( # Juntamos todo
 
 status_code(respuesta_api)  # debería ser 200 (lo es!)                           
 ```
-```{r Ruta de la API, echo=FALSE, include=FALSE}
+```{r Ruta completa, echo=FALSE, include=FALSE}
 #¿Cómo sería el link completo? (el Request URL lo da la página de la FED)
 url_api_FED <- "https://markets.newyorkfed.org/api/rates/secured/sofr/search.json?startDate=2020-01-01&endDate=2025-10-31"
 respuesta_api <- GET(url_api_FED)
