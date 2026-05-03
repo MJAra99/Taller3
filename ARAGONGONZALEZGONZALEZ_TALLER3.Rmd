@@ -576,6 +576,7 @@ tabla_ibr <- html_doc %>%
 head(tabla_ibr)
 ```
 _**¿Qué es el IBR ON?**_
+
 **El IBR ON (Indicador Bancario de Referencia - Overnight, nominal)** refleja la tasa a la que 
 los bancos en Colombia están dispuestos a prestarse  dinero entre sí a corto plazo. 
 Es una tasa no garantizada (unsecured) basada en cotizaciones del mercado interbancario.
@@ -769,7 +770,8 @@ respuesta_api <- GET( # Juntamos todo
 )
 
 status_code(respuesta_api)  # debería ser 200 (lo es!)                           
-
+```
+```{r Ruta de la API, echo=FALSE, include=FALSE}
 #¿Cómo sería el link completo? (el Request URL lo da la página de la FED)
 url_api_FED <- "https://markets.newyorkfed.org/api/rates/secured/sofr/search.json?startDate=2020-01-01&endDate=2025-10-31"
 respuesta_api <- GET(url_api_FED)
@@ -817,6 +819,7 @@ head(df_sofr) # Revisamos que todo funciona
 summary(df_sofr)
 ```
 _**¿Qué es el SOFR ON?**_
+
 **El SOFR ON (Secured Overnight Financing Rate)** representa el costo de pedir prestado dinero a un día 
 (overnight) en el mercado de repos de EE. UU., donde los préstamos están garantizados con bonos del 
 Tesoro y hay muy bajo riesgo de crédito. Se usa como referencia para derivados, préstamos y mercados financieros. 
@@ -953,7 +956,7 @@ y se añaden títulos, subtítulos y notas de fuente que contextualizan el gráf
 
 Así, el resultado es una visualización integrada que permite analizar la evolución comparada de ambas tasas de referencia, enfatizando sus patrones y co-movimientos en el periodo 2020–2025.
 
-```{r Unión y modificación y gráfica de las bases, include=FALSE}
+```{r Unión y modificación y gráfica de las bases, echo=FALSE}
 #Unimos las bases para graficar
 df_merge <- df_sofr %>%
   inner_join(df_ibr, by = "Fecha")
