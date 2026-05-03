@@ -536,7 +536,7 @@ Finalmente, se localiza la tabla dentro del DOM identificando su nodo específic
 en un dataframe para procesar. Este proceso permite estructurar la información del IBR en un formato tabular 
 para su posterior limpieza y análisis.
 
-```{r Scrapeamos, , echo=FALSE}
+```{r Scrapeamos, , echo=FALSE, include = FALSE }
 # Nota: Esta página usa Oracle Analytics, requiere interacción del navegador.
 
 # Iniciamos sesión de Chrome y abrir visor
@@ -616,7 +616,7 @@ Este recorte temporal permite garantizar consistencia en la comparación de la s
 
 Finalmente, se grafica utilizando todos los elementos estéticos necesarios para mostrar una gráfica 
 completa y detallada.
-. 
+
 
 ```{r Gráfico Literal A, echo=FALSE}
 # Graficamos
@@ -659,6 +659,7 @@ literalA <- ggplot(df_ibr, aes(x = Fecha, y = IBR)) +
 
 print (literalA)
 ```
+
 Se resalta la posibilidad de observar el gráfico de manera animada con el fin confirmar la 
 réplica exacta de la versión original disponible en la página web del Banrep 
 (disponible aquí: https://suameca.banrep.gov.co/graficador-interactivo/grafica/241). 
@@ -711,7 +712,7 @@ respuesta_api <- GET( # Juntamos todo
 
 status_code(respuesta_api)  # debería ser 200 (lo es!)                           
 
-# ¿Cómo sería el link completo? (el Request URL lo da la página de la FED)
+¿Cómo sería el link completo? (el Request URL lo da la página de la FED)
 url_api_FED <- "https://markets.newyorkfed.org/api/rates/secured/sofr/search.json?startDate=2020-01-01&endDate=2025-10-31"
 respuesta_api <- GET(url_api_FED)
 status_code(respuesta_api)  # debería ser 200
