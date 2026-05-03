@@ -723,6 +723,8 @@ ggsave(
   dpi = 300,
   units = "in" #Unidades del tamaño
 )
+
+write.csv(df_ibr, "df_ibr.csv", row.names = FALSE)
 ```
 
 ## Literal B (0,7)
@@ -996,4 +998,6 @@ ggsave(
   dpi = 300,
   units = "in" #Unidades del tamaño
 )
+
+write.csv(df_sofr, "df_sofr.csv", row.names = FALSE)
 ```
