@@ -631,9 +631,10 @@ como en la página web de origen (del Banrep).
 # Para verlo animado* (descomentar para verlo en html)
 # library(plotly)
 # ggplotly(literalA)
+```
 
-# Confirmamos que quedó correctamente graficada
-# https://suameca.banrep.gov.co/graficador-interactivo/grafica/241
+Igualmente, confirmamos que quedó correctamente graficada. Accedemos a la gráfica 
+original a través del enlace: https://suameca.banrep.gov.co/graficador-interactivo/grafica/241
 
 ```
 Y guardamos la imagen en formato png. 
@@ -650,4 +651,226 @@ ggsave(
 )
 ```
 
+## Literal B (0,7)
+Creen un gráfico donde únicamente grafiquen la tasa SOFR ON desde el 2020 hasta el final de
+octubre del 2025. Esta deberá estar en frecuencia diaria.
 
+**R/:**  Dada la naturaleza de la API de la Reserva Federal, utilizaremos esta misma
+para obtener los datos de su página sobre el SOFR ON. 
+
+
+```{r Ruta de la API, echo=FALSE}
+# Vamos a "construir" el path de la API por partes. 
+
+# Raiz de la API (pg. principal)
+url_api_FED <- "https://markets.newyorkfed.org"
+path <- "/api/rates/secured/sofr/search.json"
+
+parametros_api <- list( # Indicamos qué fechas queremos
+  startDate = "2020-01-01",
+  endDate   = "2025-10-31"
+)
+
+respuesta_api <- GET( # Juntamos todo
+  url   = url_api_FED,
+  path  = path,
+  query = parametros_api
+)
+
+status_code(respuesta_api)  # debería ser 200 (lo es!)                           
+
+# ¿Cómo sería el link completo? (el Request URL lo da la página de la FED)
+url_api_FED <- "https://markets.newyorkfed.org/api/rates/secured/sofr/search.json?startDate=2020-01-01&endDate=2025-10-31"
+respuesta_api <- GET(url_api_FED)
+status_code(respuesta_api)  # debería ser 200
+```
+
+Obtenemos...
+
+
+```{r Obtener y limpiar los datos, echo=FALSE}
+# Procesamos JSON (la info. extraida a formato modificable en R)
+texto_json <- content(respuesta_api, as = "text", encoding = "UTF-8")
+datos_json <- fromJSON(texto_json) # Estructura los datos para verlos más fácilmente
+
+
+# Extraemos y limpiamos la tabla
+## (Nota: el SOFR es diaria pero solo días hábiles)
+
+df_sofr <- datos_json$refRates %>%
+  mutate( # Podría hacerse más fácil con "transmute"*
+    Fecha = as.Date(effectiveDate), # Convierte la fecha de texto a formato Date
+    SOFR  = as.numeric(percentRate) # Convierte la tasa a formato numérico
+  ) %>%
+  select(Fecha, SOFR) %>% # Nos quedamos únicamente las columnas relevantes para el análisis
+  arrange(Fecha)  # Ordenamos los datos cronológicamente (de más antiguo a más reciente)
+
+head(df_sofr) # Revisamos que todo funciona
+summary(df_sofr)
+```
+Obtenemos la tabla del SOFR ON. 
+
+# SOFR (Secured Overnight Financing Rate)
+# Representa el costo de pedir prestado dinero a un día (overnight) en el mercado de repos de EE. UU.
+# donde los préstamos están garantizados con bonos del Tesoro y hay muy bajo riesgo de crédito.
+# Se usa como referencia para derivados, préstamos y mercados financieros. 
+
+
+Finalmente, graficamos. 
+
+```{r Graficamos, echo=FALSE}
+# Graficamos
+literalB <- ggplot(df_sofr, aes(x = Fecha, y = SOFR)) +
+  
+  # Línea de la serie temporal del SOFR
+  geom_line(color = "steelblue", linewidth = 1) +
+  
+  # Configuramos el eje X (fechas)
+  scale_x_date(
+    date_breaks = "6 months", # Mostrar una etiqueta cada 6 meses
+    labels = function(x) {
+      label_date("%b. %Y", locale = "es")(x) |> # Formato: mes abreviado + año
+        str_to_title()                          # Capitalizar la primera letra del mes
+    }
+  ) +
+  
+  # Añadir títulos y etiquetas del gráfico
+  labs(
+    title = "SOFR Overnight (Enero 2020 – Oct. 2025)",
+    subtitle = "Reserva Federal del Banco de Nueva York",
+    x = "Fecha",
+    y = "Tasa (%)", 
+    caption = "Fuente: Reserva Federal. Elaboración propia."
+  ) +
+  
+  # Tema + fondo blanco
+  theme_minimal() +
+  theme(
+    panel.background = element_rect(fill = "white", color = NA),
+    plot.background = element_rect(fill = "white", color = NA)
+  )
+
+print (literalB)
+```
+
+Podemos observarlo de manera animada para confirmar que funciona tan bien 
+como en la página web de origen (de la Reserva Federal).
+
+```{r Plotly, echo=FALSE}
+# Para verlo animado* (descomentar para verlo en html)
+# library(plotly)
+# ggplotly(literalB)
+```
+Igualmente, confirmamos que quedó correctamente graficada. Accedemos a la gráfica 
+original a través del enlace: https://www.newyorkfed.org/markets/reference-rates/sofr
+
+Finalmente, se guarda la imagen en formato png. 
+
+```{r Guardado de imagen, include=FALSE}
+# Finalmente, guardamos la imagen en formato PNG
+ggsave(
+  filename = "outputs/graficos/literalB.png",
+  plot = literalB, #Gráfico a guardar
+  width = 10, #Tamaño
+  height = 6,
+  dpi = 300,
+  units = "in" #Unidades del tamaño
+)
+```
+
+## Literal C (0,6)
+Creen un gr´afico de doble eje, donde el eje derecho represente la tasa IBR y el eje izquierdo
+represente la tasa SOFR. Realicen un análisis breve sobre este gráfico comparando las tendencias
+observadas en ambas tasas. Esta gráfica puede estar en la frecuencia que ustedes deseen.
+
+De la misma forma que el ejercicio 1, utilicen todos los elementos estéticos necesarios para
+mostrar una gráfica completa y detallada.
+
+**R/:** Se realiza el gráfico combinado del IBR ON y SOFR ON. Es importante destacar que el
+uso de doble eje implica una transformación de escala, por lo que la comparación debe centrarse 
+en tendencias más que en niveles absolutos.
+
+
+```{r Unión y modificación y gráfica de las bases, include=FALSE}
+#Unimos las bases para graficar
+df_merge <- df_sofr %>%
+  inner_join(df_ibr, by = "Fecha")
+
+#Graficamos
+literalC <- ggplot(df_merge, aes(x = Fecha)) +
+  
+  # SOFR (escala original)
+  geom_line(aes(y = SOFR, color = "SOFR"), linewidth = 1) +
+  
+  # IBR reescalado (min-max)
+  geom_line(
+    aes(
+      y = (IBR - min(IBR)) / (max(IBR) - min(IBR)) * 
+        (max(SOFR) - min(SOFR)) + min(SOFR),
+      color = "IBR"
+    ),
+    linewidth = 1
+  ) +
+  
+  # Ajustes del eje Y (igual que gráficos individuales)
+  scale_y_continuous(
+    name = "SOFR (%)",
+    
+    sec.axis = sec_axis(
+      ~ (. - min(df_merge$SOFR)) * 
+        (max(df_merge$IBR) - min(df_merge$IBR)) / 
+        (max(df_merge$SOFR) - min(df_merge$SOFR)) + 
+        min(df_merge$IBR),
+      name = "IBR (%)"
+    )
+  ) +
+  
+  # Ajustes de colores (conservar colores originales)
+  scale_color_manual(
+    values = c("SOFR" = "steelblue", "IBR" = "red")
+  ) +
+  
+  # Ajustes del eje X (igual que gráficos individuales)
+  scale_x_date(
+    date_breaks = "6 months",
+    labels = function(x) {
+      scales::label_date("%b. %Y", locale = "es")(x) |>
+        stringr::str_to_title()
+    }
+  ) +
+  
+  labs(
+    title = "Evolución de las tasas SOFR e IBR (2020–2025)",
+    subtitle = "Tasas de referencia overnight: Estados Unidos vs Colombia",
+    x = "Fecha",
+    color = "Indicador",
+    caption = "Fuente: Reserva Federal (SOFR) y Banco de la República (IBR). Elaboración propia."
+  )+
+  
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    legend.position = "bottom"
+  )  +
+  theme(
+    panel.background = element_rect(fill = "white", color = NA),
+    plot.background = element_rect(fill = "white", color = NA)
+  )
+
+print(literalC)
+
+```
+
+Finalmente, se guarda la imagen en formato png. 
+
+```{r Guardado de imagen, include=FALSE}
+# Finalmente, guardamos la imagen en formato PNG
+ggsave(
+  filename = "outputs/graficos/literalC.png",
+  plot = literalC, #Gráfico a guardar
+  width = 10, #Tamaño
+  height = 6,
+  dpi = 300,
+  units = "in" #Unidades del tamaño
+)
+```
