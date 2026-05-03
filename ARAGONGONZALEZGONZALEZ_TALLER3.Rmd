@@ -45,7 +45,8 @@ rm(list = ls())
 # Instalación y carga de paquetes necesarios
 required_packages <- c("ggplot2", "dplyr", "lubridate", "readr",
                        "writexl", "tidyr", "ggrepel",
-                      "sf", "patchwork","readxl","scales", "plotly","rmapshaper","leaflet","htmltools","sf","magrittr","modelsummary")
+                      "sf", "patchwork","readxl","scales", "plotly","rmapshaper","leaflet","htmltools","sf","magrittr","modelsummary", 
+                      "rlang","polite", "rvest", "chromote", "httr", "jsonlite", "stringr")
 
 # Función para instalar paquetes si no están instalados
 install_if_missing <- function(packages) {
