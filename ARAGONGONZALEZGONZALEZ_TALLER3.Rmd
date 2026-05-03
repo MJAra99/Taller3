@@ -1,7 +1,7 @@
 ---
 title: "Taller 3 - Taller Programación R"
 date: "Mayo 2026"
-author: "Mauricio J. Aragón R. — 201729052<br>Alejandra González - 202111607<br>Valentina González - 202111608"
+author: "Mauricio J. Aragón R. — 201729052, Alejandra González - 202111607, Valentina González - 202111608"
 
 output:
   html_document:
