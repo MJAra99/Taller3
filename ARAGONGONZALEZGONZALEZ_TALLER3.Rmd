@@ -664,7 +664,7 @@ réplica exacta de la versión original disponible en la página web del Banrep
 (disponible aquí: https://suameca.banrep.gov.co/graficador-interactivo/grafica/241). 
 
 
-```{r Plotly, echo=FALSE}
+```{r Plotly1, echo=FALSE}
 # Para verlo animado* (descomentar para verlo en html)
 # library(plotly)
 # ggplotly(literalA)
@@ -788,7 +788,7 @@ print (literalB)
 Podemos observarlo de manera animada para confirmar que funciona tan bien 
 como en la página web de origen (de la Reserva Federal).
 
-```{r Plotly, echo=FALSE}
+```{r Plotly2, echo=FALSE}
 # Para verlo animado* (descomentar para verlo en html)
 # library(plotly)
 # ggplotly(literalB)
