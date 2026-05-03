@@ -643,7 +643,7 @@ literalA <- ggplot(df_ibr, aes(x = Fecha, y = IBR)) +
     } 
   ) +
   labs(
-    title = " IBR Overnight (Enero 2020 – Oct. 2025)",
+    title = "IBR Overnight (Enero 2020 – Oct. 2025)",
     subtitle = "Banco de la República de Colombia",
     x = "Fecha",
     y = "Tasa (%)",
