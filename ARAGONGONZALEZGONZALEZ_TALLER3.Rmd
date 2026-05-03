@@ -42,6 +42,9 @@ knitr::opts_chunk$set(
 # Limpiamos el espacio de trabajo
 rm(list = ls())
 
+# Definir CRAN mirror (necesario para que install funcione en knit)
+options(repos = c(CRAN = "https://cloud.r-project.org"))
+
 # Instalación y carga de paquetes necesarios
 required_packages <- c("ggplot2", "dplyr", "lubridate", "readr",
                        "writexl", "tidyr", "ggrepel",
