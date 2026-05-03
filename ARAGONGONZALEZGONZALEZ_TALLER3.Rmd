@@ -537,7 +537,7 @@ Creen un gráfico donde únicamente grafiquen la tasa IBR ON desde el 2020 hasta
 
 Así, en primer lugar, se define la URL objetivo, que corresponde al sitio donde se encuentra alojada la información económica a extraer. Posteriormente, se implementa un enfoque de “scraping educado” mediante la función bow() del paquete polite, la cual permite verificar las condiciones de acceso establecidas por el archivo robots.txt del sitio web. Este paso es fundamental, ya que determina si el scraping está permitido, bajo qué restricciones debe realizarse y cuál es el comportamiento adecuado del usuario frente al servidor. Una vez confirmado que el acceso es permitido a los datos, es posible continuar con la extracción de datos de manera responsable.
 
-```{r Scraping Ético, echo=FALSE}
+```{r Scraping Ético}
 # Creamos el directorio para guardar las gráficas
 outputs_graficos <- "outputs/graficos"
 if (!dir.exists(outputs_graficos)) {
@@ -568,7 +568,7 @@ Luego de esperar nuevamente la carga completa del contenido dinámico, se extrae
 
 Finalmente, se localiza la tabla dentro del DOM identificando su nodo específico y se convierte directamente en un dataframe para procesar. Este proceso permite estructurar la información del IBR en un formato tabular para su posterior limpieza y análisis.
 
-```{r Scrapeamos, , echo=FALSE, include = FALSE }
+```{r Scrapeamos, echo=TRUE, results='hide', message=FALSE}
 # Nota: Esta página usa Oracle Analytics, requiere interacción del navegador.
 
 # Iniciamos sesión de Chrome y abrir visor
@@ -599,7 +599,9 @@ html_dinamico <- navegador$Runtime$evaluate(
 html_doc <- read_html(html_dinamico)
 
 html_nodes(html_doc, "table") 
+```
 
+```{r Extraer tabla, message=FALSE}
 # Extraemos la tabla
 tabla_ibr <- html_doc %>% 
   html_node("#highcharts-data-table-0") %>% # Al inspeccionar el sitio nos damos cuenta de que la tabla se encuentra en ese nodo
@@ -612,7 +614,7 @@ head(tabla_ibr)
 
 **El IBR ON (Indicador Bancario de Referencia - Overnight, nominal)** refleja la tasa a la que los bancos en Colombia están dispuestos a prestarse dinero entre sí a corto plazo. Es una tasa no garantizada (unsecured) basada en cotizaciones del mercado interbancario. Es referencia para: créditos y productos financieros en Colombia.
 
-```{r Limpieza de datos, include=FALSE}
+```{r Limpieza de datos}
 # Limpiamos los datos
 df_ibr <- tabla_ibr %>%
   
@@ -642,7 +644,7 @@ Posteriormente, se lleva a cabo la transformación de tipos de datos a fecha (pa
 
 Finalmente, se grafica utilizando todos los elementos estéticos necesarios para mostrar una gráfica completa y detallada.
 
-```{r Gráfico Literal A, echo=FALSE}
+```{r Gráfico Literal A}
 # Graficamos
 literalA <- ggplot(df_ibr, aes(x = Fecha, y = IBR)) +
   
@@ -688,7 +690,7 @@ print (literalA)
 
 \*Se resalta la posibilidad de observar el gráfico de manera animada (en versiones HTML) con el fin confirmar la réplica exacta de la versión original disponible en la página web del Banrep (disponible aquí: <https://suameca.banrep.gov.co/graficador-interactivo/grafica/241>).
 
-```{r Plotly1, echo=FALSE}
+```{r Plotly1}
 # Para verlo animado* (descomentar para verlo en html)
 # library(plotly)
 # ggplotly(literalA)
@@ -738,7 +740,7 @@ Posteriormente, se define una lista de parámetros que delimita el rango tempora
 
 A continuación, se ejecuta la solicitud HTTP mediante la función GET() del paquete httr, que combina la URL base, el endpoint y los parámetros definidos, generando una petición completa a la API. Finalmente, se verifica el estado de la respuesta, obteniendo un código 200 que indica que la solicitud fue exitosa y que los datos fueron correctamente recuperados, validando así la conexión con la API y permitiendo proceder al procesamiento de la información.
 
-```{r Ruta de la API, echo=FALSE}
+```{r Ruta de la API}
 # Vamos a "construir" el path de la API por partes. 
 
 # Raiz de la API (pg. principal)
@@ -776,7 +778,7 @@ Seguidamente, se seleccionan únicamente las variables relevantes (Fecha y SOFR)
 
 Luego de ello, se verifica la correcta estructura, contenido y comportamiento básico de los datos antes de proceder con su análisis y visualización.
 
-```{r Obtener y limpiar los datos, echo=FALSE}
+```{r Obtener y limpiar los datos}
 # Procesamos JSON (la info. extraida a formato modificable en R)
 texto_json <- content(respuesta_api, as = "text", encoding = "UTF-8")
 datos_json <- fromJSON(texto_json) # Estructura los datos para verlos más fácilmente
@@ -803,7 +805,7 @@ summary(df_sofr)
 
 Finalmente, se grafica utilizando todos los elementos estéticos necesarios para mostrar una gráfica completa y detallada.
 
-```{r Graficamos, echo=FALSE}
+```{r Graficamos}
 # Graficamos
 literalB <- ggplot(df_sofr, aes(x = Fecha, y = SOFR)) +
   
@@ -841,7 +843,7 @@ print (literalB)
 
 \*Se resalta la posibilidad de observar el gráfico de manera animada (en versiones HTML) con el fin confirmar la réplica exacta de la versión original disponible en la página web del Banrep (disponible aquí: <https://www.newyorkfed.org/markets/reference-rates/sofr>).
 
-```{r Plotly2, echo=FALSE}
+```{r Plotly2}
 # Para verlo animado* (descomentar para verlo en html)
 # library(plotly)
 # ggplotly(literalB)
@@ -892,7 +894,7 @@ Adicionalmente, se definen colores diferenciados para cada serie (azul para SOFR
 
 Así, el resultado es una visualización integrada que permite analizar la evolución comparada de ambas tasas de referencia, enfatizando sus patrones y co-movimientos en el periodo 2020–2025.
 
-```{r Unión y modificación y gráfica de las bases, echo=FALSE}
+```{r Unión y modificación y gráfica de las bases}
 #Unimos las bases para graficar
 df_merge <- df_sofr %>%
   inner_join(df_ibr, by = "Fecha")
