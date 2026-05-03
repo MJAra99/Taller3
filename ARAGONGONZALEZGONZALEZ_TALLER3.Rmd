@@ -1025,6 +1025,7 @@ literalC <- ggplot(df_merge, aes(x = Fecha)) +
 print(literalC)
 
 ```
+
 **Interpretación:** la comparación conjunta de las tasas SOFR (Estados Unidos) e IBR (Colombia) permite analizar no solo la 
 dinámica interna de cada economía, sino también la sincronización —y los desfases— en los ciclos de política monetaria 
 entre una economía desarrollada y una emergente.
