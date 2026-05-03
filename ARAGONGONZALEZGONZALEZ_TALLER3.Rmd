@@ -25,10 +25,10 @@ knitr::opts_chunk$set(
 
 Elaborarán un mapa en el cual se visualizará el Índice de Desempeño Fiscal (IDF) del DNP por departamento. Para esto, utilizarán tres fuentes de datos:
 
-- `IDF.xlsx` generado por el [DNP](https://ciffit.dnp.gov.co/CIFFIT/ConsultasIDF)
-- Shapefile a nivel departamental y municipal generado por el [DANE](https://geoportal.dane.gov.co/servicios/descarga-y-metadatos/datos-geoestadisticos/?cod=111)
-- `proyección poblacional.xlsx` cuya fuente es el [DANE](https://www.dane.gov.co/files/censo2018/proyecciones-de-poblacion/Municipal/PPED-AreaMun-2018-2042_VP.xlsx)
-- Valor agregado municipal, cuya fuente es el [DANE](https://www.dane.gov.co/index.php/estadisticas-por-tema/cuentas-nacionales/cuentas-nacionales-departamentales)
+-   `IDF.xlsx` generado por el [DNP](https://ciffit.dnp.gov.co/CIFFIT/ConsultasIDF)
+-   Shapefile a nivel departamental y municipal generado por el [DANE](https://geoportal.dane.gov.co/servicios/descarga-y-metadatos/datos-geoestadisticos/?cod=111)
+-   `proyección poblacional.xlsx` cuya fuente es el [DANE](https://www.dane.gov.co/files/censo2018/proyecciones-de-poblacion/Municipal/PPED-AreaMun-2018-2042_VP.xlsx)
+-   Valor agregado municipal, cuya fuente es el [DANE](https://www.dane.gov.co/index.php/estadisticas-por-tema/cuentas-nacionales/cuentas-nacionales-departamentales)
 
 Sean cuidadosos con las llaves que usan para unir las bases de datos. Recuerden manipular adecuadamente las tres bases de datos y estudiar la estructura que tiene cada una. **No deben modificar o sobreescribir información directamente sobre los archivos**. Todo el tratamiento de datos debe hacerse dentro de R.
 
@@ -108,12 +108,12 @@ $$
 
 donde:
 
-- $\text{IDF}_j$: Es el Índice de Desempeño Fiscal artificial del departamento $j$
-- $\text{IDF}_i$: Es el Índice de Desempeño Fiscal real del municipio $i$ dentro del departamento $j$
-- $L_i$: Población del municipio $i$
-- $\text{VA}_i$: Es el valor agregado del municipio $i$
-- $\Sigma_j$: Se define como $\Sigma_j = \sum_i^n \text{VA}_i \times L_i$
-- $n$ Número de municipios en el departamento $j$
+-   $\text{IDF}_j$: Es el Índice de Desempeño Fiscal artificial del departamento $j$
+-   $\text{IDF}_i$: Es el Índice de Desempeño Fiscal real del municipio $i$ dentro del departamento $j$
+-   $L_i$: Población del municipio $i$
+-   $\text{VA}_i$: Es el valor agregado del municipio $i$
+-   $\Sigma_j$: Se define como $\Sigma_j = \sum_i^n \text{VA}_i \times L_i$
+-   $n$ Número de municipios en el departamento $j$
 
 Por otro lado, nuestro objetivo será aplicar la fórmula para el 2024. Para esto **apliquen el crecimiento del PIB de Colombia en el 2024** (no el $\text{VA}_i$) al crecimiento del $\text{VA}_i$ por municipio, cuyo último dato está en el 2023. Calculen ese crecimiento solo con dos decimales (ejemplo 2.85%) para el cálculo del nuevo $\text{VA}_i$.
 
@@ -330,7 +330,7 @@ tabla_cat <- datasummary(
   Rango_Cat ~ (N + Percent()),
   data = base_dep
 )
-print(tabla_cat)
+tabla_cat
 ```
 
 ```{r tabla2}
@@ -346,6 +346,14 @@ datasummary_df(tabla_top5)
 datasummary_df(tabla_tail5)
 
 ```
+
+El IDF (Índice de Desempeño Fiscal) es un indicador elaborado por el Departamento Nacional de Planeación (DNP) para evaluar la salud fiscal y la gestión financiera de los departamentos y municipios. Su objetivo es medir qué tan sostenible y responsable es el manejo de las finanzas públicas de una entidad territorial, y sirve como referencia para compararla con otras y para orientar políticas de fortalecimiento fiscal.
+
+El IDF mide varias variables financieras clave, entre ellas: los ingresos totales, los gastos de funcionamiento, el ahorro corriente, el nivel de endeudamiento y la capacidad de inversión y de ejecución. Estas variables se agrupan en dimensiones como resultados fiscales y gestión financiera, permitiendo evaluar si la entidad gasta de forma eficiente, mantiene su deuda bajo control y genera recursos para inversión pública y formación de capital.
+
+Como se puede ver en los mapas anteriores, la mayoría de los departamentos se encuentran en la categoría de riesgo (54.55%) y solo dos departamentos (Bogotá y Atlántico) se encuentran en la categoría Solvente.Los departamentos con peor desempeño son Caquetá y Vichada.
+
+En general, se observa un mejor desempeño en los departamentos con ciudades  principales, lo cual puede estar explicado por mayores ingresos no dependientes de transferencia y una mayor y eficiente ejecución de las inversiones públicas.
 
 ## Literal B (0.5)
 
@@ -475,32 +483,56 @@ mapa_leaflet <- leaflet(sf_dataM) %>%
 mapa_leaflet
 ```
 
-**R/:** Para la elaboración del mapa nos topamos con un problema computacional...
+**R/:** Para la elaboración del mapa nos topamos con un problema computacional al intentar usar `ggplotly`, pues se demoraba demasiado en renderizar los polígonos correspondientes a los más de 1,100 municipios y posteriormente aplicar el relleno con base en el IDF. Inicialmente, con base en el código de la clase y con ayuda de la IA generativa *Gemini* construimos los primeros mapas con base en un widget html que permitiera el hoover con la leyenda correspondiente, lo cual funcionó bastante bien para los departamentos, pero no estaba logrando renderizar para los municipios. Por lo anterior le pedimos a la IA que nos ayudara a generar eficiencias con base en los mapas hechos con `leaflet` (vistos en clase). Con esto, nos recomentó también disminuir el detalle de los polígonos de los municipios, ya que no era necesario tanto detalle para los mapas del taller.
+
+Como resultados construimos los mapas anteriores y decidimos utilizar el mismo código para optimizar los de los departamentos, de manera que el código renderizara más rápido.
+
+A continuación, presentamos unas tablas con los resultados principales para el IDF a nivel municipal:
+
+```{r tabla3}
+tabla_cat2 <- datasummary(
+  Rango_Cat ~ (N + Percent()),
+  data = base_mun
+)
+tabla_cat2
+```
+
+```{r tabla4}
+tabla_top5M <- base_mun %>%
+  select(DP, DPNOM, DPMP, IDF, Rango_Cat) %>% 
+  arrange(desc(IDF)) %>%
+  head(5)
+
+tabla_tail5M <- base_mun %>%
+  select(DP, DPNOM, DPMP, IDF, Rango_Cat) %>% 
+  arrange(IDF) %>%
+  head(5)
+
+datasummary_df(tabla_top5M)
+datasummary_df(tabla_tail5M)
+
+```
+
+A diferencia del nivel departamental, a nivel municipal se ven observaciones en los niveles extremos (deterioro y solvente) con 21 y 1 municipios respectivamente. Los municipios con peor desempeño se encuentran en la región Caribe, y en nivel de deterioro con puntajes cercanos a 30. Mientras que el municipio con mejor desempeño fue Samacá en el departamento de Boyacá. Bogotá se encuentra en el tercer puesto, lo cual ejemplifica que el desempeño en el índice no depende únicamente del nivel de ingresos de los municipios sino también de la ejecución de sus inversiones y la salud y sostenibilidad de su nivel de endeudamiento, entre otros.
 
 # Ejercicio 2: Web Scraping y Uso de API (2.0)
 
-Para este ejercicio, deberán extraer información del Banco de la República de Colombia y de la
-Reserva Federal de los Estados Unidos. Podrán hacerlo tanto por medio de API como por medio de
-web scraping.
-
+Para este ejercicio, deberán extraer información del Banco de la República de Colombia y de la Reserva Federal de los Estados Unidos. Podrán hacerlo tanto por medio de API como por medio de web scraping.
 
 ## Literal A (0.7)
 
-Creen un gráfico donde únicamente grafiquen la tasa IBR ON desde el 2020 hasta el final de
-octubre del 2025. Esta deberá estar en frecuencia diaria.
+Creen un gráfico donde únicamente grafiquen la tasa IBR ON desde el 2020 hasta el final de octubre del 2025. Esta deberá estar en frecuencia diaria.
 
-**R/:**  Dada la naturaleza de la API del Banco de la República, utilizaremos Web Scraping 
-para obtener los datos de su página sobre el IBR ON. 
+**R/:** Dada la naturaleza de la API del Banco de la República, utilizaremos Web Scraping para obtener los datos de su página sobre el IBR ON.
 
-Así, en primer lugar, se define la URL objetivo, que corresponde al sitio donde se encuentra 
-alojada la información económica a extraer. Posteriormente, se implementa un enfoque de
-“scraping educado” mediante la función bow() del paquete polite, la cual permite verificar las 
-condiciones de acceso establecidas por el archivo robots.txt del sitio web. 
-Este paso es fundamental, ya que determina si el scraping está permitido, bajo qué restricciones 
-debe realizarse y cuál es el comportamiento adecuado del usuario frente al servidor.  Una vez confirmado
-que el acceso es permitido a los datos, es posible continuar con la extracción de datos de manera responsable.
+Así, en primer lugar, se define la URL objetivo, que corresponde al sitio donde se encuentra alojada la información económica a extraer. Posteriormente, se implementa un enfoque de “scraping educado” mediante la función bow() del paquete polite, la cual permite verificar las condiciones de acceso establecidas por el archivo robots.txt del sitio web. Este paso es fundamental, ya que determina si el scraping está permitido, bajo qué restricciones debe realizarse y cuál es el comportamiento adecuado del usuario frente al servidor. Una vez confirmado que el acceso es permitido a los datos, es posible continuar con la extracción de datos de manera responsable.
 
 ```{r Scraping Ético, echo=FALSE}
+# Creamos el directorio para guardar las gráficas
+outputs_graficos <- "outputs/graficos"
+if (!dir.exists(outputs_graficos)) {
+  dir.create(outputs_graficos, recursive = TRUE)}
+
 # Empezamos por preguntarle a la página web si la podemos scrapear
 
 # Scraping "Educado"
@@ -516,25 +548,15 @@ sesion_educada <- bow(
 print(sesion_educada) # Muestra el estatus y el delay permitido. Podemos scrapear
 ```
 
-Ahora bien, se identifica que los datos provienen de una web dinámica del Banco de la República 
-que utiliza Oracle Analytics, lo cual requiere interacción con el navegador para poder acceder 
-a la tabla de información del IBR.
+Ahora bien, se identifica que los datos provienen de una web dinámica del Banco de la República que utiliza Oracle Analytics, lo cual requiere interacción con el navegador para poder acceder a la tabla de información del IBR.
 
-Así, para extraer los datos, en primer lugar, se inicia una sesión de navegador automatizado 
-mediante ChromoteSession, lo que permite simular la interacción de un usuario real en un entorno tipo Chrome headless. 
-Esta sesión se abre con view() para inspección y depuración visual del proceso de scraping. 
+Así, para extraer los datos, en primer lugar, se inicia una sesión de navegador automatizado mediante ChromoteSession, lo que permite simular la interacción de un usuario real en un entorno tipo Chrome headless. Esta sesión se abre con view() para inspección y depuración visual del proceso de scraping.
 
-Posteriormente, se navega a la URL objetivo del IBR. A continuación, se ejecuta código JavaScript 
-directamente dentro de la página mediante con el objetivo de interactuar con la interfaz gráfica del sitio. 
-En este caso específico, se simula un clic sobre el botón correspondiente a la pestaña “Vista tabla”, 
-lo cual permite revelar la estructura tabular de los datos que no está disponible en el HTML inicial.
+Posteriormente, se navega a la URL objetivo del IBR. A continuación, se ejecuta código JavaScript directamente dentro de la página mediante con el objetivo de interactuar con la interfaz gráfica del sitio. En este caso específico, se simula un clic sobre el botón correspondiente a la pestaña “Vista tabla”, lo cual permite revelar la estructura tabular de los datos que no está disponible en el HTML inicial.
 
-Luego de esperar nuevamente la carga completa del contenido dinámico, se extrae el DOM completo de la página,
-obteniendo así el código HTML actualizado tras la interacción. Este HTML se convierte a un objeto manipulable en R.
+Luego de esperar nuevamente la carga completa del contenido dinámico, se extrae el DOM completo de la página, obteniendo así el código HTML actualizado tras la interacción. Este HTML se convierte a un objeto manipulable en R.
 
-Finalmente, se localiza la tabla dentro del DOM identificando su nodo específico y se convierte directamente 
-en un dataframe para procesar. Este proceso permite estructurar la información del IBR en un formato tabular 
-para su posterior limpieza y análisis.
+Finalmente, se localiza la tabla dentro del DOM identificando su nodo específico y se convierte directamente en un dataframe para procesar. Este proceso permite estructurar la información del IBR en un formato tabular para su posterior limpieza y análisis.
 
 ```{r Scrapeamos, , echo=FALSE, include = FALSE }
 # Nota: Esta página usa Oracle Analytics, requiere interacción del navegador.
@@ -575,12 +597,10 @@ tabla_ibr <- html_doc %>%
 
 head(tabla_ibr)
 ```
-_**¿Qué es el IBR ON?**_
 
-**El IBR ON (Indicador Bancario de Referencia - Overnight, nominal)** refleja la tasa a la que 
-los bancos en Colombia están dispuestos a prestarse  dinero entre sí a corto plazo. 
-Es una tasa no garantizada (unsecured) basada en cotizaciones del mercado interbancario.
-Es referencia para: créditos y productos financieros en Colombia.
+***¿Qué es el IBR ON?***
+
+**El IBR ON (Indicador Bancario de Referencia - Overnight, nominal)** refleja la tasa a la que los bancos en Colombia están dispuestos a prestarse dinero entre sí a corto plazo. Es una tasa no garantizada (unsecured) basada en cotizaciones del mercado interbancario. Es referencia para: créditos y productos financieros en Colombia.
 
 ```{r Limpieza de datos, include=FALSE}
 # Limpiamos los datos
@@ -603,22 +623,14 @@ df_ibr <- tabla_ibr %>%
     Fecha <= as.Date("2025-10-31")
   )
 ```
-Posteriormente, se realiza la depuración del conjunto de datos final del IBR a partir de la tabla 
-previamente extraída desde el Banco de la República.
 
-En primer lugar, se seleccionan únicamente las variables de interés dentro de la tabla original: 
-la fecha de observación y el valor del Indicador Bancario de Referencia (IBR) overnight nominal. 
-En este proceso, ambas columnas son renombradas para facilitar su uso posterior, estandarizando los 
-nombres, lo cual mejora la legibilidad del análisis.
+Posteriormente, se realiza la depuración del conjunto de datos final del IBR a partir de la tabla previamente extraída desde el Banco de la República.
 
-Posteriormente, se lleva a cabo la transformación de tipos de datos a fecha (para la fecha) y numérica (IBR) según corresponde.
-Finalmente, se aplica un filtro de depuración de la base de datos. Se eliminan observaciones con valores 
-de fecha faltantes y se restringe el periodo de análisis entre el 1 de enero de 2020 y el 31 de octubre de 2025. 
-Este recorte temporal permite garantizar consistencia en la comparación de la serie y alinearla con el horizonte de análisis del estudio.
+En primer lugar, se seleccionan únicamente las variables de interés dentro de la tabla original: la fecha de observación y el valor del Indicador Bancario de Referencia (IBR) overnight nominal. En este proceso, ambas columnas son renombradas para facilitar su uso posterior, estandarizando los nombres, lo cual mejora la legibilidad del análisis.
 
-Finalmente, se grafica utilizando todos los elementos estéticos necesarios para mostrar una gráfica 
-completa y detallada.
+Posteriormente, se lleva a cabo la transformación de tipos de datos a fecha (para la fecha) y numérica (IBR) según corresponde. Finalmente, se aplica un filtro de depuración de la base de datos. Se eliminan observaciones con valores de fecha faltantes y se restringe el periodo de análisis entre el 1 de enero de 2020 y el 31 de octubre de 2025. Este recorte temporal permite garantizar consistencia en la comparación de la serie y alinearla con el horizonte de análisis del estudio.
 
+Finalmente, se grafica utilizando todos los elementos estéticos necesarios para mostrar una gráfica completa y detallada.
 
 ```{r Gráfico Literal A, echo=FALSE}
 # Graficamos
@@ -664,56 +676,31 @@ literalA <- ggplot(df_ibr, aes(x = Fecha, y = IBR)) +
 print (literalA)
 ```
 
-*Se resalta la posibilidad de observar el gráfico de manera animada  (en versiones HTML) con el fin confirmar la 
-réplica exacta de la versión original disponible en la página web del Banrep 
-(disponible aquí: https://suameca.banrep.gov.co/graficador-interactivo/grafica/241). 
+\*Se resalta la posibilidad de observar el gráfico de manera animada (en versiones HTML) con el fin confirmar la réplica exacta de la versión original disponible en la página web del Banrep (disponible aquí: <https://suameca.banrep.gov.co/graficador-interactivo/grafica/241>).
 
-**Interpretación:** la dinámica observada en la serie del IBR overnight para el periodo 2020–2025 refleja con 
-bastante claridad la transmisión de la política monetaria del Banco de la República frente a choques macroeconómicos 
-sucesivos, particularmente la pandemia y el posterior episodio inflacionario.
+**Interpretación:** la dinámica observada en la serie del IBR overnight para el periodo 2020–2025 refleja con bastante claridad la transmisión de la política monetaria del Banco de la República frente a choques macroeconómicos sucesivos, particularmente la pandemia y el posterior episodio inflacionario.
 
-En una primera fase (primer semestre de 2020), se identifica una reducción abrupta de la tasa, 
-pasando de niveles cercanos al 4% a valores por debajo del 2%. Este comportamiento es consistente con una política monetaria 
-expansiva contracíclica, orientada a mitigar la caída de la actividad económica derivada del choque exógeno del COVID-19. 
-La disminución del IBR, como tasa interbancaria de referencia, refleja una relajación de las condiciones de 
-liquidez y un abaratamiento del costo del dinero en el corto plazo.
+En una primera fase (primer semestre de 2020), se identifica una reducción abrupta de la tasa, pasando de niveles cercanos al 4% a valores por debajo del 2%. Este comportamiento es consistente con una política monetaria expansiva contracíclica, orientada a mitigar la caída de la actividad económica derivada del choque exógeno del COVID-19. La disminución del IBR, como tasa interbancaria de referencia, refleja una relajación de las condiciones de liquidez y un abaratamiento del costo del dinero en el corto plazo.
 
-Posteriormente, entre finales de 2020 y buena parte de 2021, la tasa se mantiene en niveles históricamente bajos 
-y relativamente estables. Este tramo sugiere una postura acomodaticia prolongada, en un contexto donde la recuperación 
-económica aún era incipiente y las presiones inflacionarias se mantenían contenidas.
+Posteriormente, entre finales de 2020 y buena parte de 2021, la tasa se mantiene en niveles históricamente bajos y relativamente estables. Este tramo sugiere una postura acomodaticia prolongada, en un contexto donde la recuperación económica aún era incipiente y las presiones inflacionarias se mantenían contenidas.
 
-A partir de 2022 se observa un cambio de régimen claramente definido: la tasa inicia un ciclo de incrementos 
-sostenidos y pronunciados, alcanzando niveles superiores al 12% hacia 2023. Este comportamiento responde a un 
-proceso de endurecimiento monetario (tightening), motivado por el aumento de la inflación (tanto por factores internos como externos)
-y la necesidad de anclar expectativas inflacionarias. La pendiente empinada de la curva en este periodo evidencia una respuesta 
-agresiva de política, donde el Banco de la República incrementa rápidamente su tasa de referencia, lo cual se transmite casi uno a uno al IBR.
+A partir de 2022 se observa un cambio de régimen claramente definido: la tasa inicia un ciclo de incrementos sostenidos y pronunciados, alcanzando niveles superiores al 12% hacia 2023. Este comportamiento responde a un proceso de endurecimiento monetario (tightening), motivado por el aumento de la inflación (tanto por factores internos como externos) y la necesidad de anclar expectativas inflacionarias. La pendiente empinada de la curva en este periodo evidencia una respuesta agresiva de política, donde el Banco de la República incrementa rápidamente su tasa de referencia, lo cual se transmite casi uno a uno al IBR.
 
-Es particularmente relevante notar que la trayectoria ascendente no es completamente suave, sino escalonada, 
-lo cual es coherente con la naturaleza discreta de las decisiones de política monetaria (reuniones periódicas de la Junta Directiva). 
-Esto sugiere una alta efectividad en el mecanismo de transmisión hacia el mercado interbancario, donde el IBR 
-actúa como un reflejo inmediato de la tasa de política.
+Es particularmente relevante notar que la trayectoria ascendente no es completamente suave, sino escalonada, lo cual es coherente con la naturaleza discreta de las decisiones de política monetaria (reuniones periódicas de la Junta Directiva). Esto sugiere una alta efectividad en el mecanismo de transmisión hacia el mercado interbancario, donde el IBR actúa como un reflejo inmediato de la tasa de política.
 
-Finalmente, desde mediados de 2023 en adelante, se evidencia una fase de estabilización seguida de 
-una leve reducción de la tasa, ubicándose alrededor del 9% hacia 2025. Este comportamiento es indicativo de
-una transición hacia una postura monetaria menos restrictiva, posiblemente en respuesta a la moderación de la inflación y 
-a la necesidad de no afectar excesivamente la actividad económica. Sin embargo, el nivel aún elevado sugiere que la política 
-permanece en terreno contractivo en términos reales.
+Finalmente, desde mediados de 2023 en adelante, se evidencia una fase de estabilización seguida de una leve reducción de la tasa, ubicándose alrededor del 9% hacia 2025. Este comportamiento es indicativo de una transición hacia una postura monetaria menos restrictiva, posiblemente en respuesta a la moderación de la inflación y a la necesidad de no afectar excesivamente la actividad económica. Sin embargo, el nivel aún elevado sugiere que la política permanece en terreno contractivo en términos reales.
 
-En conjunto, la gráfica permite identificar tres tendencias claras:
-**(i)** expansión monetaria en respuesta a la crisis
-**(ii)** fase de normalización con tasas bajas
-**(iii)** endurecimiento agresivo seguido de estabilización. 
+En conjunto, la gráfica permite identificar tres tendencias claras: **(i)** expansión monetaria en respuesta a la crisis **(ii)** fase de normalización con tasas bajas **(iii)** endurecimiento agresivo seguido de estabilización.
 
-Más allá de los niveles, se destaca la capacidad del IBR para capturar de manera inmediata y precisa 
-la orientación de la política monetaria, convirtiéndose en un excelente proxy de las condiciones financieras de corto 
-plazo en la economía colombiana.
+Más allá de los niveles, se destaca la capacidad del IBR para capturar de manera inmediata y precisa la orientación de la política monetaria, convirtiéndose en un excelente proxy de las condiciones financieras de corto plazo en la economía colombiana.
 
 ```{r Plotly1, echo=FALSE}
 # Para verlo animado* (descomentar para verlo en html)
 # library(plotly)
 # ggplotly(literalA)
 ```
-Finalmente, se guarda la imagen en formato png. 
+
+Finalmente, se guarda la imagen en formato png.
 
 ```{r Guardado de imagen1, include=FALSE}
 # Finalmente, guardamos la imagen en formato PNG
@@ -730,26 +717,16 @@ write.csv(df_ibr, "df_ibr.csv", row.names = FALSE)
 ```
 
 ## Literal B (0,7)
-Creen un gráfico donde únicamente grafiquen la tasa SOFR ON desde el 2020 hasta el final de
-octubre del 2025. Esta deberá estar en frecuencia diaria.
 
-**R/:**  Dada la naturaleza de la API de la Reserva Federal de Nueva York, utilizaremos esta misma
-para consultar y obtener los datos de la serie histórica de la tasa SOFR (Secured Overnight Financing Rate). 
+Creen un gráfico donde únicamente grafiquen la tasa SOFR ON desde el 2020 hasta el final de octubre del 2025. Esta deberá estar en frecuencia diaria.
 
-En primer lugar, se referencia la documentación oficial de la API, la cual describe los endpoints disponibles
-y los parámetros necesarios para realizar consultas estructuradas. A partir de esto, 
-se construye la URL de la solicitud de manera modular, separando la raíz del servidor del endpoint específico (path), 
-correspondiente a la búsqueda de tasas SOFR en formato JSON.
+**R/:** Dada la naturaleza de la API de la Reserva Federal de Nueva York, utilizaremos esta misma para consultar y obtener los datos de la serie histórica de la tasa SOFR (Secured Overnight Financing Rate).
 
-Posteriormente, se define una lista de parámetros que delimita el rango temporal de interés, 
-en este caso entre el 1 de enero de 2020 y el 31 de octubre de 2025. 
-Esta parametrización permite realizar consultas dinámicas sin necesidad de modificar directamente la URL.
+En primer lugar, se referencia la documentación oficial de la API, la cual describe los endpoints disponibles y los parámetros necesarios para realizar consultas estructuradas. A partir de esto, se construye la URL de la solicitud de manera modular, separando la raíz del servidor del endpoint específico (path), correspondiente a la búsqueda de tasas SOFR en formato JSON.
 
-A continuación, se ejecuta la solicitud HTTP mediante la función GET() del paquete httr, que combina la URL base, 
-el endpoint y los parámetros definidos, generando una petición completa a la API. 
-Finalmente, se verifica el estado de la respuesta, obteniendo un código 200 que indica que la solicitud fue 
-exitosa y que los datos fueron correctamente recuperados, validando así la conexión con la API y 
-permitiendo proceder al procesamiento de la información.
+Posteriormente, se define una lista de parámetros que delimita el rango temporal de interés, en este caso entre el 1 de enero de 2020 y el 31 de octubre de 2025. Esta parametrización permite realizar consultas dinámicas sin necesidad de modificar directamente la URL.
+
+A continuación, se ejecuta la solicitud HTTP mediante la función GET() del paquete httr, que combina la URL base, el endpoint y los parámetros definidos, generando una petición completa a la API. Finalmente, se verifica el estado de la respuesta, obteniendo un código 200 que indica que la solicitud fue exitosa y que los datos fueron correctamente recuperados, validando así la conexión con la API y permitiendo proceder al procesamiento de la información.
 
 ```{r Ruta de la API, echo=FALSE}
 # Vamos a "construir" el path de la API por partes. 
@@ -771,32 +748,23 @@ respuesta_api <- GET( # Juntamos todo
 
 status_code(respuesta_api)  # debería ser 200 (lo es!)                           
 ```
+
 ```{r Ruta completa, echo=FALSE, include=FALSE}
 #¿Cómo sería el link completo? (el Request URL lo da la página de la FED)
 url_api_FED <- "https://markets.newyorkfed.org/api/rates/secured/sofr/search.json?startDate=2020-01-01&endDate=2025-10-31"
 respuesta_api <- GET(url_api_FED)
 status_code(respuesta_api)  # debería ser 200
 ```
-Posteriormente se realiza la transformación de la respuesta obtenida desde la API en un conjunto de 
-datos estructurado y listo para análisis. Este proceso se realiza con ayuda de la 
-inteligencia artificial generativa ChatGPT, y su proceso se documenta en el documento adjunto. 
 
-En primer lugar, el contenido de la respuesta se extrae en formato texto, especificando la codificación 
-UTF-8 para asegurar una correcta interpretación de los caracteres. Posteriormente, este texto en 
-formato JSON se convierte a una estructura de datos en R, lo que permite acceder de manera organizada a sus distintos componentes.
+Posteriormente se realiza la transformación de la respuesta obtenida desde la API en un conjunto de datos estructurado y listo para análisis. Este proceso se realiza con ayuda de la inteligencia artificial generativa ChatGPT, y su proceso se documenta en el documento adjunto.
 
-A continuación, se extrae específicamente la sección "refRates", que contiene la información de la tasa SOFR, 
-y se procede a construir un dataframe. En este proceso, se transforman las variables clave: 
-la fecha se convierte a formato Date, facilitando su uso en análisis temporales, y la tasa se convierte a formato numérico,
-permitiendo su tratamiento como variable continua.
+En primer lugar, el contenido de la respuesta se extrae en formato texto, especificando la codificación UTF-8 para asegurar una correcta interpretación de los caracteres. Posteriormente, este texto en formato JSON se convierte a una estructura de datos en R, lo que permite acceder de manera organizada a sus distintos componentes.
 
-Seguidamente, se seleccionan únicamente las variables relevantes (Fecha y SOFR), eliminando información redundante, 
-y se ordenan las observaciones cronológicamente desde la más antigua hasta la más reciente. 
-Cabe señalar que, al tratarse de una tasa overnight, la serie es diaria pero únicamente para días hábiles,
-lo cual es consistente con la dinámica del mercado financiero.
+A continuación, se extrae específicamente la sección "refRates", que contiene la información de la tasa SOFR, y se procede a construir un dataframe. En este proceso, se transforman las variables clave: la fecha se convierte a formato Date, facilitando su uso en análisis temporales, y la tasa se convierte a formato numérico, permitiendo su tratamiento como variable continua.
 
-Luego de ello, se verifica la correcta estructura, contenido y comportamiento básico de los datos antes 
-de proceder con su análisis y visualización.
+Seguidamente, se seleccionan únicamente las variables relevantes (Fecha y SOFR), eliminando información redundante, y se ordenan las observaciones cronológicamente desde la más antigua hasta la más reciente. Cabe señalar que, al tratarse de una tasa overnight, la serie es diaria pero únicamente para días hábiles, lo cual es consistente con la dinámica del mercado financiero.
+
+Luego de ello, se verifica la correcta estructura, contenido y comportamiento básico de los datos antes de proceder con su análisis y visualización.
 
 ```{r Obtener y limpiar los datos, echo=FALSE}
 # Procesamos JSON (la info. extraida a formato modificable en R)
@@ -818,14 +786,12 @@ df_sofr <- datos_json$refRates %>%
 head(df_sofr) # Revisamos que todo funciona
 summary(df_sofr)
 ```
-_**¿Qué es el SOFR ON?**_
 
-**El SOFR ON (Secured Overnight Financing Rate)** representa el costo de pedir prestado dinero a un día 
-(overnight) en el mercado de repos de EE. UU., donde los préstamos están garantizados con bonos del 
-Tesoro y hay muy bajo riesgo de crédito. Se usa como referencia para derivados, préstamos y mercados financieros. 
+***¿Qué es el SOFR ON?***
 
-Finalmente, se grafica utilizando todos los elementos estéticos necesarios para mostrar una gráfica 
-completa y detallada.
+**El SOFR ON (Secured Overnight Financing Rate)** representa el costo de pedir prestado dinero a un día (overnight) en el mercado de repos de EE. UU., donde los préstamos están garantizados con bonos del Tesoro y hay muy bajo riesgo de crédito. Se usa como referencia para derivados, préstamos y mercados financieros.
+
+Finalmente, se grafica utilizando todos los elementos estéticos necesarios para mostrar una gráfica completa y detallada.
 
 ```{r Graficamos, echo=FALSE}
 # Graficamos
@@ -863,54 +829,29 @@ literalB <- ggplot(df_sofr, aes(x = Fecha, y = SOFR)) +
 print (literalB)
 ```
 
-*Se resalta la posibilidad de observar el gráfico de manera animada (en versiones HTML) con el fin confirmar la 
-réplica exacta de la versión original disponible en la página web del Banrep 
-(disponible aquí: https://www.newyorkfed.org/markets/reference-rates/sofr). 
+\*Se resalta la posibilidad de observar el gráfico de manera animada (en versiones HTML) con el fin confirmar la réplica exacta de la versión original disponible en la página web del Banrep (disponible aquí: <https://www.newyorkfed.org/markets/reference-rates/sofr>).
 
-**Interpretación:** la trayectoria del SOFR overnight entre 2020 y 2025 refleja con alta fidelidad la orientación de 
-la política monetaria de la Reserva Federal y, en particular, su respuesta a dos regímenes macroeconómicos claramente 
-diferenciados: el choque pandémico y el posterior episodio inflacionario global.
+**Interpretación:** la trayectoria del SOFR overnight entre 2020 y 2025 refleja con alta fidelidad la orientación de la política monetaria de la Reserva Federal y, en particular, su respuesta a dos regímenes macroeconómicos claramente diferenciados: el choque pandémico y el posterior episodio inflacionario global.
 
-En una primera fase (primer trimestre de 2020), se observa una caída abrupta de la tasa hacia niveles cercanos a cero. 
-Este comportamiento es consistente con una intervención de emergencia por parte de la Reserva Federal, 
-que redujo agresivamente su tasa de referencia y expandió la liquidez del sistema financiero. Dado que el SOFR es 
-una tasa basada en transacciones efectivas en el mercado de repos respaldados por bonos del Tesoro, 
-su descenso inmediato evidencia una transmisión casi perfecta de la política monetaria hacia las condiciones de financiamiento 
-de muy corto plazo. En este contexto, el objetivo fue evitar disrupciones en el sistema financiero y sostener el 
-crédito en un entorno de alta incertidumbre.
+En una primera fase (primer trimestre de 2020), se observa una caída abrupta de la tasa hacia niveles cercanos a cero. Este comportamiento es consistente con una intervención de emergencia por parte de la Reserva Federal, que redujo agresivamente su tasa de referencia y expandió la liquidez del sistema financiero. Dado que el SOFR es una tasa basada en transacciones efectivas en el mercado de repos respaldados por bonos del Tesoro, su descenso inmediato evidencia una transmisión casi perfecta de la política monetaria hacia las condiciones de financiamiento de muy corto plazo. En este contexto, el objetivo fue evitar disrupciones en el sistema financiero y sostener el crédito en un entorno de alta incertidumbre.
 
-Durante el periodo 2020–2021, la tasa permanece en niveles persistentemente bajos, caracterizandose por abundante liquidez 
-y un entorno propicio para la recuperación económica. La estabilidad del SOFR en este rango sugiere que el mercado internalizó 
-plenamente la señal de la autoridad monetaria de mantener condiciones expansivas por un periodo prolongado.
+Durante el periodo 2020–2021, la tasa permanece en niveles persistentemente bajos, caracterizandose por abundante liquidez y un entorno propicio para la recuperación económica. La estabilidad del SOFR en este rango sugiere que el mercado internalizó plenamente la señal de la autoridad monetaria de mantener condiciones expansivas por un periodo prolongado.
 
-A partir de inicios de 2022, se identifica un cambio de régimen marcado, con un incremento rápido y escalonado de la tasa. 
-Este comportamiento responde al inicio del ciclo de endurecimiento monetario más agresivo en décadas, 
-impulsado por presiones inflacionarias elevadas y persistentes. La pendiente pronunciada de la serie refleja no solo 
-la magnitud de los ajustes, sino también su frecuencia, lo que indica una estrategia deliberada de la Reserva Federal 
-para re-anclar expectativas de inflación y recuperar credibilidad.
+A partir de inicios de 2022, se identifica un cambio de régimen marcado, con un incremento rápido y escalonado de la tasa. Este comportamiento responde al inicio del ciclo de endurecimiento monetario más agresivo en décadas, impulsado por presiones inflacionarias elevadas y persistentes. La pendiente pronunciada de la serie refleja no solo la magnitud de los ajustes, sino también su frecuencia, lo que indica una estrategia deliberada de la Reserva Federal para re-anclar expectativas de inflación y recuperar credibilidad.
 
-Es relevante notar que el ajuste se da en forma de escalones discretos, lo cual coincide con el calendario 
-de decisiones del FOMC (Comité Federal de Mercado Abierto). Esto confirma que el SOFR actúa como un instrumento altamente sensible
-y contemporáneo a la tasa de política, incorporando rápidamente la información de cada decisión. En términos de microestructura,
-esto sugiere un mercado de repos profundo, líquido y con fricciones mínimas.
-Hacia finales de 2023 y durante 2024, la tasa alcanza una meseta en niveles elevados (alrededor de 5%), lo que indica una 
-fase de política monetaria restrictiva sostenida. Este periodo puede interpretarse como un intento de la Reserva Federal de 
-mantener condiciones financieras suficientemente contractivas para asegurar la convergencia de la inflación hacia su objetivo.
+Es relevante notar que el ajuste se da en forma de escalones discretos, lo cual coincide con el calendario de decisiones del FOMC (Comité Federal de Mercado Abierto). Esto confirma que el SOFR actúa como un instrumento altamente sensible y contemporáneo a la tasa de política, incorporando rápidamente la información de cada decisión. En términos de microestructura, esto sugiere un mercado de repos profundo, líquido y con fricciones mínimas. Hacia finales de 2023 y durante 2024, la tasa alcanza una meseta en niveles elevados (alrededor de 5%), lo que indica una fase de política monetaria restrictiva sostenida. Este periodo puede interpretarse como un intento de la Reserva Federal de mantener condiciones financieras suficientemente contractivas para asegurar la convergencia de la inflación hacia su objetivo.
 
-Finalmente, en 2025 se observa una leve corrección a la baja, aunque sin retornar a niveles bajos. Esto sugiere el inicio 
-de una posible fase de normalización, donde la política comienza a relajarse gradualmente en respuesta a señales de desaceleración 
-económica o moderación inflacionaria. Sin embargo, el hecho de que la tasa permanezca relativamente alta indica que la postura monetaria 
-sigue siendo, en términos reales, restrictiva.
+Finalmente, en 2025 se observa una leve corrección a la baja, aunque sin retornar a niveles bajos. Esto sugiere el inicio de una posible fase de normalización, donde la política comienza a relajarse gradualmente en respuesta a señales de desaceleración económica o moderación inflacionaria. Sin embargo, el hecho de que la tasa permanezca relativamente alta indica que la postura monetaria sigue siendo, en términos reales, restrictiva.
 
-Dicho esto, el SOFR no solo refleja la dirección de la política monetaria, sino también su intensidad, credibilidad y velocidad de transmisión. 
-La claridad de los regímenes observados (expansión extrema, estabilidad, endurecimiento agresivo y estabilización restrictiva) evidencia un mecanismo de transmisión altamente eficiente, donde las decisiones del banco central parecen traducirse casi instantáneamente en las condiciones del mercado monetario.
+Dicho esto, el SOFR no solo refleja la dirección de la política monetaria, sino también su intensidad, credibilidad y velocidad de transmisión. La claridad de los regímenes observados (expansión extrema, estabilidad, endurecimiento agresivo y estabilización restrictiva) evidencia un mecanismo de transmisión altamente eficiente, donde las decisiones del banco central parecen traducirse casi instantáneamente en las condiciones del mercado monetario.
 
 ```{r Plotly2, echo=FALSE}
 # Para verlo animado* (descomentar para verlo en html)
 # library(plotly)
 # ggplotly(literalB)
 ```
-Finalmente, se guarda la imagen en formato png. 
+
+Finalmente, se guarda la imagen en formato png.
 
 ```{r Guardado de imagen2, include=FALSE}
 # Finalmente, guardamos la imagen en formato PNG
@@ -925,34 +866,18 @@ ggsave(
 ```
 
 ## Literal C (0,6)
-Creen un gráfico de doble eje, donde el eje derecho represente la tasa IBR y el eje izquierdo
-represente la tasa SOFR. Realicen un análisis breve sobre este gráfico comparando las tendencias
-observadas en ambas tasas. Esta gráfica puede estar en la frecuencia que ustedes deseen.
 
-De la misma forma que el ejercicio 1, utilicen todos los elementos estéticos necesarios para
-mostrar una gráfica completa y detallada.
+Creen un gráfico de doble eje, donde el eje derecho represente la tasa IBR y el eje izquierdo represente la tasa SOFR. Realicen un análisis breve sobre este gráfico comparando las tendencias observadas en ambas tasas. Esta gráfica puede estar en la frecuencia que ustedes deseen.
 
-**R/:** Se realiza el gráfico combinado del IBR ON y SOFR ON. Es importante destacar que el
-uso de doble eje implica una transformación de escala, por lo que la comparación debe centrarse 
-en tendencias más que en niveles absolutos.
+De la misma forma que el ejercicio 1, utilicen todos los elementos estéticos necesarios para mostrar una gráfica completa y detallada.
 
-En primer lugar, se realiza la unión de las bases de datos previamente empleadas para graficar las series 
-IBR ON y SOFR ON a través de un inner_join por la variable Fecha. Este tipo de unión garantiza que únicamente 
-se conserven las observaciones coincidentes en ambas series, permitiendo una comparación temporal 
-consistente entre las tasas de referencia de Estados Unidos y Colombia.
+**R/:** Se realiza el gráfico combinado del IBR ON y SOFR ON. Es importante destacar que el uso de doble eje implica una transformación de escala, por lo que la comparación debe centrarse en tendencias más que en niveles absolutos.
 
-A continuación, se representan ambas series en una misma figura. La tasa SOFR se grafica en su escala original, 
-mientras que la tasa IBR se somete a una transformación de reescalamiento tipo min-max. 
-Esta transformación ajusta la serie del IBR al rango de valores de la SOFR, lo que permite superponer 
-ambas curvas en un mismo eje sin distorsionar su dinámica relativa. 
-Es importante resaltar que este procedimiento no preserva los niveles absolutos de la IBR, sino que facilita la comparación de tendencias.
-Para mantener la interpretabilidad, se incorpora un eje secundario que revierte la transformación aplicada al IBR, 
-permitiendo visualizar sus valores en su escala original. De esta forma, el eje izquierdo representa la SOFR y 
-el eje derecho la IBR, cada uno en sus respectivas unidades.
+En primer lugar, se realiza la unión de las bases de datos previamente empleadas para graficar las series IBR ON y SOFR ON a través de un inner_join por la variable Fecha. Este tipo de unión garantiza que únicamente se conserven las observaciones coincidentes en ambas series, permitiendo una comparación temporal consistente entre las tasas de referencia de Estados Unidos y Colombia.
 
-Adicionalmente, se definen colores diferenciados para cada serie (azul para SOFR y rojo para IBR), 
-se configuran las escalas temporales del eje X con cortes semestrales y etiquetas en formato de mes y año, 
-y se añaden títulos, subtítulos y notas de fuente que contextualizan el gráfico.
+A continuación, se representan ambas series en una misma figura. La tasa SOFR se grafica en su escala original, mientras que la tasa IBR se somete a una transformación de reescalamiento tipo min-max. Esta transformación ajusta la serie del IBR al rango de valores de la SOFR, lo que permite superponer ambas curvas en un mismo eje sin distorsionar su dinámica relativa. Es importante resaltar que este procedimiento no preserva los niveles absolutos de la IBR, sino que facilita la comparación de tendencias. Para mantener la interpretabilidad, se incorpora un eje secundario que revierte la transformación aplicada al IBR, permitiendo visualizar sus valores en su escala original. De esta forma, el eje izquierdo representa la SOFR y el eje derecho la IBR, cada uno en sus respectivas unidades.
+
+Adicionalmente, se definen colores diferenciados para cada serie (azul para SOFR y rojo para IBR), se configuran las escalas temporales del eje X con cortes semestrales y etiquetas en formato de mes y año, y se añaden títulos, subtítulos y notas de fuente que contextualizan el gráfico.
 
 Así, el resultado es una visualización integrada que permite analizar la evolución comparada de ambas tasas de referencia, enfatizando sus patrones y co-movimientos en el periodo 2020–2025.
 
@@ -1026,14 +951,9 @@ print(literalC)
 
 ```
 
-**Interpretación:** la comparación conjunta de las tasas SOFR (Estados Unidos) e IBR (Colombia) permite analizar no solo la 
-dinámica interna de cada economía, sino también la sincronización —y los desfases— en los ciclos de política monetaria 
-entre una economía desarrollada y una emergente.
+**Interpretación:** la comparación conjunta de las tasas SOFR (Estados Unidos) e IBR (Colombia) permite analizar no solo la dinámica interna de cada economía, sino también la sincronización —y los desfases— en los ciclos de política monetaria entre una economía desarrollada y una emergente.
 
-En una primera fase, en **2020**, ambas tasas exhiben una caída pronunciada, reflejando respuestas expansivas frente al choque global de la pandemia. 
-Sin embargo, el ajuste es más drástico en Estados Unidos, donde la SOFR converge rápidamente a niveles cercanos a cero, 
-mientras que el IBR, aunque disminuye, se mantiene en niveles superiores. Esto sugiere una mayor restricción estructural en 
-Colombia para llevar la tasa a cero, posiblemente asociada a primas de riesgo, estructura del sistema financiero y consideraciones cambiarias.
+En una primera fase, en **2020**, ambas tasas exhiben una caída pronunciada, reflejando respuestas expansivas frente al choque global de la pandemia. Sin embargo, el ajuste es más drástico en Estados Unidos, donde la SOFR converge rápidamente a niveles cercanos a cero, mientras que el IBR, aunque disminuye, se mantiene en niveles superiores. Esto sugiere una mayor restricción estructural en Colombia para llevar la tasa a cero, posiblemente asociada a primas de riesgo, estructura del sistema financiero y consideraciones cambiarias.
 
 Durante **2020–2021**, ambas economías mantuvieron tasas bajas para estimular la actividad. Sin embargo, en Estados Unidos la tasa (SOFR) cayó prácticamente a cero, mientras que en Colombia (IBR), aunque disminuyó, se mantuvo por encima de ese nivel. Este diferencial refleja condiciones financieras globales más holgadas en economías avanzadas y una asimetría en el espacio de política monetaria.
 
@@ -1048,7 +968,6 @@ Durante **2023** se observa una fase de convergencia en tendencia, donde ambas t
 A partir de finales de 2023 y durante **2024–2025**, emerge nuevamente una divergencia. La SOFR comienza a ajustarse levemente a la baja, mientras que el IBR inicia una reducción más gradual pero desde niveles considerablemente más altos. Este patrón sugiere que Estados Unidos entra antes en una fase de normalización monetaria mientras que Colombia mantiene una postura más persistentemente restrictiva para consolidar la convergencia inflacionaria y mitigar riesgos cambiarios
 
 Así, la interacción entre las tasas permite entender que el IBR no solo responde a condiciones internas, sino que también está condicionado por el entorno monetario internacional, particularmente por la trayectoria de la SOFR. Sin embargo, el mayor nivel y volatilidad del IBR reflejan que, en economías emergentes, la política monetaria enfrenta restricciones adicionales, lo que se traduce en ciclos más intensos y prolongados.
-
 
 ```{r Guardado de imagen, include=FALSE}
 # Finalmente, guardamos la imagen en formato PNG
