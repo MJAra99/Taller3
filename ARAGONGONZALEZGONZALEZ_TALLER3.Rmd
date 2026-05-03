@@ -1045,6 +1045,6 @@ Debido a la naturaleza de **Shiny** y **R Markdown**, la aplicación fue desarro
 Por esta razón, para ejecutar correctamente el ejercicio se recomienda:
 
 1. Correr previamente este archivo `.Rmd`, donde se generan y organizan las bases de datos necesarias.  
-2. Posteriormente, abrir y ejecutar **completamente** el script del aplicativo Shiny en una sesión activa de RStudio.
+2. Posteriormente, abrir y ejecutar **completamente** el script del aplicativo Shiny (ARAGONGONZALEZGONZALEZ_TALLER3.R) en una sesión activa de RStudio.
 
 De esta manera, los objetos creados en el documento estarán disponibles para el correcto funcionamiento de la aplicación.
