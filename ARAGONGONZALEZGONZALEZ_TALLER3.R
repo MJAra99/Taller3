@@ -42,7 +42,7 @@ lapply(required_packages, library, character.only = TRUE)
 username <- Sys.getenv("USERNAME")
 
 # Construir ruta hacia los datos usando el usuario actual
-path_taller <- paste0("C:/Users/", username, "/Desktop/ECONOMÍA 2026-1/Taller de Programación R/Taller 3/Taller3-main")
+path_taller <- paste0("C:/Users/", username, "/OneDrive/Documents/GitHub/MEcA/Taller R/Taller3")
 
 # Establecer directorio de trabajo
 setwd(path_taller)
